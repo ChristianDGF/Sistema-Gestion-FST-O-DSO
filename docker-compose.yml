@@ -46,7 +46,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inventario_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/sistema-gestion
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/sistema-gestion
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/sistema-gestion/protocol/openid-connect/certs
     depends_on:
       db:
