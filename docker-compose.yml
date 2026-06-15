@@ -53,6 +53,15 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: inventario-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
     restart: unless-stopped
 
 volumes:
