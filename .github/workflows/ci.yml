@@ -40,3 +40,20 @@ jobs:
       with:
         name: coverage-report
         path: build/reports/jacoco/
+
+    - name: Run E2E Tests (Playwright)
+      run: |
+        docker-compose up -d db keycloak
+        sleep 15
+        docker-compose up -d app frontend
+        sleep 15
+        cd frontend
+        npm ci
+        npx playwright install --with-deps chromium
+        npm run test:e2e
+      continue-on-error: true
+
+    - name: Tear down Docker Compose
+      if: always()
+      run: docker-compose down
+
