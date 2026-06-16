@@ -1,0 +1,44 @@
+prometheus.scrape "backend" {
+  targets = [{
+    __address__ = "app:8081",
+  }]
+  forward_to      = [prometheus.remote_write.default.receiver]
+  metrics_path     = "/actuator/prometheus"
+  scrape_interval  = "15s"
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces = [otelcol.exporter.otlphttp.tempo.input]
+    logs   = [otelcol.exporter.loki.default.input]
+  }
+}
+
+otelcol.exporter.otlphttp "tempo" {
+  client {
+    endpoint = "http://tempo:3200"
+  }
+}
+
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
