@@ -73,6 +73,26 @@ pipeline {
             }
         }
 
+        stage('Run E2E Tests') {
+            steps {
+                script {
+                    try {
+                        sh 'docker-compose up -d db keycloak'
+                        sleep 15
+                        sh 'docker-compose up -d app frontend'
+                        sleep 15
+                        dir("${FRONTEND_DIR}") {
+                            sh 'npm ci'
+                            sh 'npx playwright install --with-deps chromium'
+                            sh 'npm run test:e2e'
+                        }
+                    } finally {
+                        sh 'docker-compose down'
+                    }
+                }
+            }
+        }
+
         stage('Docker Build') {
             when {
                 expression { env.BUILD_DOCKER == 'true' }
