@@ -29,7 +29,7 @@ otelcol.receiver.otlp "default" {
 
 otelcol.exporter.otlphttp "tempo" {
   client {
-    endpoint = "http://tempo:3200"
+    endpoint = "http://tempo:4318"
   }
 }
 
