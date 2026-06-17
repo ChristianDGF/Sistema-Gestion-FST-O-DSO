@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useKeycloak } from '../auth/KeycloakContext';
@@ -8,7 +8,7 @@ const MainLayout = () => {
   const { isAuthenticated } = useKeycloak();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return null; // Keycloak ya maneja la redirección con onLoad: 'login-required'
   }
 
   return (
