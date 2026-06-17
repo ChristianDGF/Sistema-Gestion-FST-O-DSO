@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, Package, LogOut, Activity, ShieldCheck } from 'lucide-react';
 import { useKeycloak } from '../auth/KeycloakContext';
 import clsx from 'clsx';
 
@@ -12,6 +12,7 @@ const Sidebar = () => {
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Stock Movements', href: '/stock-movements', icon: Activity },
+    { name: 'Auditoría', href: '/audit', icon: ShieldCheck },
   ];
 
   return (

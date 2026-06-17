@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 
 import StockMovements from './pages/StockMovements';
+import Audit from './pages/Audit';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="stock-movements" element={<StockMovements />} />
+          <Route path="audit" element={<Audit />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
