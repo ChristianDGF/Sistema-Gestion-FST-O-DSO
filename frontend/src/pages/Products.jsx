@@ -35,7 +35,6 @@ const Products = () => {
         await api.delete(`/products/${id}`);
         fetchProducts();
       } catch (error) {
-        console.error('Failed to delete product', error);
         const message = error.response?.data?.message || 'Could not delete product. It may have stock movements associated.';
         alert(message);
       }
