@@ -14,4 +14,6 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     Page<StockMovement> findByProductIdOrderByCreatedAtDesc(Long productId, Pageable pageable);
 
     List<StockMovement> findByProductIdOrderByCreatedAtDesc(Long productId);
+
+    boolean existsByProductId(Long productId);
 }

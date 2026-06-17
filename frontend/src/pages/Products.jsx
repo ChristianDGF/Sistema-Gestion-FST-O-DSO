@@ -36,7 +36,8 @@ const Products = () => {
         fetchProducts();
       } catch (error) {
         console.error('Failed to delete product', error);
-        alert('Could not delete product. It may have stock movements associated.');
+        const message = error.response?.data?.message || 'Could not delete product. It may have stock movements associated.';
+        alert(message);
       }
     }
   };

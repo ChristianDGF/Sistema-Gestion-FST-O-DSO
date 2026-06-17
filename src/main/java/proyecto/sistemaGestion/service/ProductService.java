@@ -15,6 +15,7 @@ import proyecto.sistemaGestion.enums.ProductStatus;
 import proyecto.sistemaGestion.exception.BusinessException;
 import proyecto.sistemaGestion.exception.ResourceNotFoundException;
 import proyecto.sistemaGestion.repository.ProductRepository;
+import proyecto.sistemaGestion.repository.StockMovementRepository;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final StockMovementRepository stockMovementRepository;
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> findAll(int page, int size, String sortBy, String sortDir,
@@ -103,6 +105,9 @@ public class ProductService {
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Producto no encontrado con ID: " + id);
+        }
+        if (stockMovementRepository.existsByProductId(id)) {
+            throw new BusinessException("No se puede eliminar el producto porque tiene movimientos de stock asociados");
         }
         productRepository.deleteById(id);
     }
