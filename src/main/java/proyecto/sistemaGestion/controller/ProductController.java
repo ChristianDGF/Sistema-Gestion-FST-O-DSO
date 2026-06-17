@@ -82,6 +82,7 @@ public class ProductController {
     @Operation(summary = "Eliminar producto", description = "Elimina un producto del inventario")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "El producto tiene movimientos de stock asociados"),
         @ApiResponse(responseCode = "404", description = "Producto no encontrado")
     })
     @PreAuthorize("hasAuthority('SCOPE_product:manage')")
