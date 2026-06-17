@@ -17,6 +17,7 @@ import proyecto.sistemaGestion.enums.ProductStatus;
 import proyecto.sistemaGestion.exception.BusinessException;
 import proyecto.sistemaGestion.exception.ResourceNotFoundException;
 import proyecto.sistemaGestion.repository.ProductRepository;
+import proyecto.sistemaGestion.repository.StockMovementRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,6 +33,9 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private StockMovementRepository stockMovementRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -147,6 +151,7 @@ class ProductServiceTest {
     @Test
     void delete_shouldDeleteProduct_whenExists() {
         when(productRepository.existsById(1L)).thenReturn(true);
+        when(stockMovementRepository.existsByProductId(1L)).thenReturn(false);
         doNothing().when(productRepository).deleteById(1L);
 
         productService.delete(1L);
