@@ -10,5 +10,3 @@ scrape_configs:
         labels:
           application: 'sistemaGestion'
 
-remote_write:
-  - url: http://prometheus:9090/api/v1/write
