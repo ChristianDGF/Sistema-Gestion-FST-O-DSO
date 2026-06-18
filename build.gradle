@@ -63,6 +63,7 @@ tasks.named('test') {
 	finalizedBy jacocoTestReport
 	testLogging {
 		events "passed", "skipped", "failed"
+		exceptionFormat = 'full'
 	}
 }
 

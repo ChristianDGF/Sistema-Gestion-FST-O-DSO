@@ -75,9 +75,9 @@ class ProductServiceTest {
 
         PageResponse<ProductResponse> result = productService.findAll(0, 20, "name", "asc", null, null, null, null);
 
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals("Laptop", result.getContent().getFirst().getName());
+        assertNotNull(result, "La respuesta paginada no debe ser nula");
+        assertEquals(1, result.getTotalElements(), "El total de elementos debe ser 1");
+        assertEquals("Laptop", result.getContent().getFirst().getName(), "El nombre del producto en la página no coincide");
         verify(productRepository).findByFilters(any(), any(), any(), any(), any());
     }
 
@@ -88,16 +88,17 @@ class ProductServiceTest {
 
         ProductResponse result = productService.findById(1L);
 
-        assertNotNull(result);
-        assertEquals("Laptop", result.getName());
-        assertEquals("LAP-001", result.getSku());
+        assertNotNull(result, "El producto obtenido no debe ser nulo");
+        assertEquals("Laptop", result.getName(), "El nombre del producto no coincide con el esperado");
+        assertEquals("LAP-001", result.getSku(), "El SKU del producto no coincide con el esperado");
     }
 
     @Test
     void findById_shouldThrowException_whenNotFound() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.findById(99L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.findById(99L), 
+                "Debería lanzar ResourceNotFoundException si el producto no existe");
     }
 
     @Test
@@ -109,8 +110,8 @@ class ProductServiceTest {
 
         ProductResponse result = productService.create(request);
 
-        assertNotNull(result);
-        assertEquals("Laptop", result.getName());
+        assertNotNull(result, "El producto creado no debe ser nulo");
+        assertEquals("Laptop", result.getName(), "El nombre del producto creado no coincide");
         verify(productRepository).save(any(Product.class));
     }
 
@@ -119,7 +120,8 @@ class ProductServiceTest {
         ProductRequest request = createRequest("Laptop", "LAP-001", 10, 5);
         when(productRepository.existsBySku("LAP-001")).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> productService.create(request));
+        assertThrows(BusinessException.class, () -> productService.create(request), 
+                "Debería lanzar BusinessException si se intenta crear con un SKU ya existente");
         verify(productRepository, never()).save(any());
     }
 
@@ -132,8 +134,8 @@ class ProductServiceTest {
 
         ProductResponse result = productService.update(1L, request);
 
-        assertNotNull(result);
-        assertEquals("New Name", result.getName());
+        assertNotNull(result, "El producto actualizado no debe ser nulo");
+        assertEquals("New Name", result.getName(), "El nombre del producto actualizado no coincide");
         verify(productRepository).save(any(Product.class));
     }
 
@@ -144,7 +146,8 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(productRepository.existsBySku("LAP-002")).thenReturn(true);
 
-        assertThrows(BusinessException.class, () -> productService.update(1L, request));
+        assertThrows(BusinessException.class, () -> productService.update(1L, request), 
+                "Debería lanzar BusinessException si el SKU a actualizar ya está en uso");
         verify(productRepository, never()).save(any());
     }
 
@@ -163,7 +166,8 @@ class ProductServiceTest {
     void delete_shouldThrowException_whenNotFound() {
         when(productRepository.existsById(99L)).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.delete(99L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.delete(99L), 
+                "Debería lanzar ResourceNotFoundException al intentar eliminar un producto que no existe");
         verify(productRepository, never()).deleteById(any());
     }
 }
