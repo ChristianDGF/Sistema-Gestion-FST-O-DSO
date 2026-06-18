@@ -35,7 +35,8 @@ public class ProductService {
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> productPage = productRepository.findByFilters(search, category, status, lowStock, pageable);
+        String normalizedSearch = (search == null || search.isBlank()) ? "" : search.trim();
+        Page<Product> productPage = productRepository.findByFilters(normalizedSearch, category, status, lowStock, pageable);
 
         List<ProductResponse> content = productPage.getContent().stream()
                 .map(this::toResponse)
