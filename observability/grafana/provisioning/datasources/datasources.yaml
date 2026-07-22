@@ -1,6 +1,7 @@
 apiVersion: 1
 
 datasources:
+  # ─── Prometheus ──────────────────────────────────────────────────────────
   - name: Prometheus
     type: prometheus
     uid: prometheus
@@ -9,6 +10,7 @@ datasources:
     isDefault: true
     editable: true
 
+  # ─── Tempo (Trazas distribuidas) ─────────────────────────────────────────
   - name: Tempo
     type: tempo
     uid: tempo
@@ -16,13 +18,41 @@ datasources:
     url: http://tempo:3200
     editable: true
     jsonData:
-      tracesToMetrics:
-        datasourceUid: 'prometheus'
-      serviceMap:
-        datasourceUid: 'prometheus'
+      # Gráfico de nodos del service map basado en Prometheus
       nodeGraph:
         enabled: true
 
+      # Service map: dibuja el grafo de dependencias entre servicios
+      serviceMap:
+        datasourceUid: 'prometheus'
+
+      # Traza → Métricas: enlace a métricas de Prometheus desde un span
+      tracesToMetrics:
+        datasourceUid: 'prometheus'
+        tags:
+          - key: 'service.name'
+            value: 'app'
+        queries:
+          - name: 'Request rate'
+            query: 'rate(http_server_requests_seconds_count{app="$__tags"}[5m])'
+          - name: 'Error rate'
+            query: 'rate(http_server_requests_seconds_count{app="$__tags",outcome="SERVER_ERROR"}[5m])'
+
+      # Traza → Logs: botón "Logs for this trace" en cada span de Tempo.
+      # Filtra en Loki por el campo JSON traceId usando LogQL.
+      tracesToLogsV2:
+        datasourceUid: 'loki'
+        spanStartTimeShift: '-1m'
+        spanEndTimeShift:   '1m'
+        tags:
+          - key: 'service.name'
+            value: 'app'
+        filterByTraceID: true
+        filterBySpanID:  false
+        customQuery: true
+        query: '{app="sistemaGestion"} | json | traceId=`$${__trace.traceId}`'
+
+  # ─── Loki (Logs centralizados) ───────────────────────────────────────────
   - name: Loki
     type: loki
     uid: loki
@@ -30,8 +60,13 @@ datasources:
     url: http://loki:3100
     editable: true
     jsonData:
+      # Log → Traza: extrae el traceId del campo JSON y crea un enlace a Tempo.
+      # El appender Loki4j envía cada log como JSON: {"traceId":"abc123",...}
+      # El regex busca ese campo dentro del mensaje crudo de Loki.
       derivedFields:
         - datasourceUid: 'tempo'
-          matcherRegex: "traceId=(\\w+)"
-          name: TraceID
-          url: "${__value.raw}"
+          matcherType: 'label'
+          matcherRegex: 'traceId'
+          name: 'TraceID'
+          url: '${__value.raw}'
+          urlDisplayLabel: 'Ver traza en Tempo'

@@ -23,7 +23,8 @@
             <format>
                 <label>
                     <!-- Etiquetas que Loki indexa y por las que se puede filtrar -->
-                    <pattern>app=${spring.application.name:-sistemaGestion},env=${spring.profiles.active:-local},level=%level,host=${HOSTNAME:-localhost}</pattern>
+                    <!-- traceId como label permite correlación directa Log→Traza en Grafana -->
+                    <pattern>app=${spring.application.name:-sistemaGestion},env=${spring.profiles.active:-local},level=%level,host=${HOSTNAME:-localhost},traceId=%X{traceId:-none}</pattern>
                 </label>
                 <message>
                     <!-- Mensaje en JSON estructurado para facilitar búsquedas -->
