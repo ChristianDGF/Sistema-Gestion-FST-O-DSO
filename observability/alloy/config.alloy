@@ -26,14 +26,17 @@ otelcol.receiver.otlp "default" {
   }
 
   output {
-    traces = [otelcol.exporter.otlphttp.tempo.input]
+    traces = [otelcol.exporter.otlp.tempo.input]
     logs   = [otelcol.exporter.loki.default.input]
   }
 }
 
-otelcol.exporter.otlphttp "tempo" {
+otelcol.exporter.otlp "tempo" {
   client {
-    endpoint = "http://tempo:4318"
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
   }
 }
 

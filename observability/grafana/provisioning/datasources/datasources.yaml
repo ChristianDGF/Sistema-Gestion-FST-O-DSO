@@ -18,6 +18,7 @@ datasources:
     url: http://tempo:3200
     editable: true
     jsonData:
+
       # Gráfico de nodos del service map basado en Prometheus
       nodeGraph:
         enabled: true

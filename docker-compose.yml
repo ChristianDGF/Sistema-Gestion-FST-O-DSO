@@ -46,9 +46,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inventario_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/sistema-gestion
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/sistema-gestion/protocol/openid-connect/certs
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318/v1/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://alloy:4318/v1/traces
       LOKI_URL: http://loki:3100
     depends_on:
       db:
@@ -86,7 +88,7 @@ services:
   tempo:
     image: grafana/tempo:2.7.1
     container_name: inventario-tempo
-    command: ["-config.file=/etc/tempo.yml"]
+    command: ["-target=all", "-config.file=/etc/tempo.yml"]
     ports:
       - "3200:3200"
       - "4317:4317"

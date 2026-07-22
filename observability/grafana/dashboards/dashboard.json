@@ -308,17 +308,17 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(traces_spanmetrics_duration_milliseconds_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_duration_milliseconds_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_duration_milliseconds_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service=\"sistemaGestion\"}[5m])) by (le))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -357,19 +357,18 @@
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
       "id": 12,
       "title": "Busqueda de Trazas Recientes",
-      "description": "Busca y explora trazas recientes directamente desde el dashboard. Haz clic en un traceId para ver la cascada de spans completa.",
-      "type": "traces",
+      "description": "Busca y explora trazas recientes directamente desde el dashboard. Haz clic directamente en el texto del traceId para ver la cascada de spans completa. (Nota: No uses el botón desplegable/dropdown ya que es un bug conocido en Grafana 11.6 para paneles de tabla).",
+      "type": "table",
       "options": {
-        "showSpanFilters": true
+        "showHeader": true
       },
       "targets": [
         {
           "datasource": { "type": "tempo", "uid": "tempo" },
           "limit": 20,
-          "queryType": "traceql",
-          "query": "{}",
-          "refId": "A",
-          "tableType": "traces"
+          "queryType": "traceqlSearch",
+          "query": "{ .service.name=\"sistemaGestion\" }",
+          "refId": "A"
         }
       ]
     },
