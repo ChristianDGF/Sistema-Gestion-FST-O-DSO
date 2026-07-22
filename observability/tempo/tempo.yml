@@ -18,6 +18,9 @@ storage:
     wal:
       path: /var/tempo/wal
 
+# metrics_generator: convierte trazas en métricas (spanmetrics + service-graphs)
+# En Tempo 2.7.x, processors y remote_write van dentro de metrics_generator.processor
+# y metrics_generator.storage respectivamente — NO como campos directos del bloque.
 metrics_generator:
   registry:
     external_labels:
@@ -25,15 +28,21 @@ metrics_generator:
       cluster: local
   storage:
     path: /var/tempo/generator/wal
-  processors:
-    # Genera histogramas de latencia y contadores de spans por operación
-    - span-metrics
-    # Genera el grafo de dependencias entre servicios (service map)
-    - service-graphs
-  remote_write:
-    - url: http://prometheus:9090/api/v1/write
-      send_exemplars: true
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  processor:
+    span_metrics:
+      # Dimensiones adicionales para los histogramas de latencia
+      dimensions:
+        - http.method
+        - http.route
+        - http.status_code
+    service_graphs:
+      dimensions:
+        - http.method
 
+# overrides: activa los processors para todos los tenants
 overrides:
   defaults:
     metrics_generator:
