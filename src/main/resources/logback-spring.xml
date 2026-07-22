@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- =========================================================== -->
+    <!--  CONSOLE APPENDER — Legible para desarrollo local           -->
+    <!-- =========================================================== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId} spanId=%X{spanId} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- =========================================================== -->
+    <!--  LOKI4J APPENDER — Logs estructurados JSON hacia Loki       -->
+    <!--  Activo únicamente fuera del perfil "test"                  -->
+    <!-- =========================================================== -->
+    <springProfile name="!test">
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <!-- En Docker se resuelve como "loki"; en local usa la variable de entorno o el default -->
+                <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <!-- Etiquetas que Loki indexa y por las que se puede filtrar -->
+                    <pattern>app=${spring.application.name:-sistemaGestion},env=${spring.profiles.active:-local},level=%level,host=${HOSTNAME:-localhost}</pattern>
+                </label>
+                <message>
+                    <!-- Mensaje en JSON estructurado para facilitar búsquedas -->
+                    <pattern>
+                        {
+                          "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+                          "level": "%level",
+                          "thread": "%thread",
+                          "logger": "%logger{36}",
+                          "traceId": "%X{traceId:-none}",
+                          "spanId": "%X{spanId:-none}",
+                          "message": "%message",
+                          "exception": "%ex{5}"
+                        }
+                    </pattern>
+                    <charset>UTF-8</charset>
+                </message>
+                <sortByTime>true</sortByTime>
+            </format>
+        </appender>
+    </springProfile>
+
+    <!-- =========================================================== -->
+    <!--  ROOT LOGGER                                                 -->
+    <!-- =========================================================== -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <springProfile name="!test">
+            <appender-ref ref="LOKI"/>
+        </springProfile>
+    </root>
+
+    <!-- Reducir ruido de frameworks -->
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.security" level="WARN"/>
+
+</configuration>
