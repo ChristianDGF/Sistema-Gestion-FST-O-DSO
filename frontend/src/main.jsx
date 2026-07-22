@@ -1,3 +1,5 @@
+// OTel MUST be the first import — instruments XHR/fetch before any other module loads
+import './tracing.js'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
