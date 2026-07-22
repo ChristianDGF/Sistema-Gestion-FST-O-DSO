@@ -178,7 +178,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_active_seconds_count{application=\"sistemaGestion\"}[5m])) by (uri, method)",
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"sistemaGestion\"}[5m])) by (uri, method)",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
@@ -207,7 +207,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_active_seconds_sum{application=\"sistemaGestion\"}[5m])) by (uri) / sum(rate(http_server_requests_active_seconds_count{application=\"sistemaGestion\"}[5m])) by (uri)",
+          "expr": "sum(rate(http_server_requests_seconds_sum{application=\"sistemaGestion\"}[5m])) by (uri) / sum(rate(http_server_requests_seconds_count{application=\"sistemaGestion\"}[5m])) by (uri)",
           "legendFormat": "{{uri}}",
           "refId": "A"
         }
@@ -234,7 +234,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(increase(http_server_requests_active_seconds_count{application=\"sistemaGestion\", status=~\"4..|5..\"}[5m])) by (status, uri)",
+          "expr": "sum(increase(http_server_requests_seconds_count{application=\"sistemaGestion\", status=~\"4..|5..\"}[5m])) by (status, uri)",
           "legendFormat": "{{status}} {{uri}}",
           "refId": "A"
         }
