@@ -50,6 +50,14 @@ pipeline {
             }
         }
 
+        stage('SonarCloud Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    sh './gradlew test jacocoTestReport sonar -Dsonar.token=${SONAR_TOKEN} --no-daemon'
+                }
+            }
+        }
+
         stage('Frontend Install & Lint') {
             steps {
                 dir("${FRONTEND_DIR}") {
