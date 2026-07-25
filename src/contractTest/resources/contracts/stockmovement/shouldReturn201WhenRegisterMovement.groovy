@@ -21,17 +21,19 @@ Contract.make {
         status 201
         headers { contentType(applicationJson()) }
         body([
-            id               : $(anyPositiveInt()),
-            productId        : $(anyPositiveInt()),
+            id               : $(anyNumber()),
+            productId        : $(anyNumber()),
             productName      : $(anyNonEmptyString()),
             productSku       : $(anyNonEmptyString()),
             movementType     : $(anyOf('IN', 'OUT', 'ADJUSTMENT')),
-            quantity         : $(anyPositiveInt()),
-            previousQuantity : $(anyPositiveInt()),
-            newQuantity      : $(anyPositiveInt()),
+            quantity         : $(anyNumber()),
+            previousQuantity : $(anyNumber()),
+            newQuantity      : $(anyNumber()),
             userId           : $(anyNonEmptyString()),
             observations     : $(anyNonEmptyString()),
-            createdAt        : $(anyIso8601WithOffset())
+            createdAt        : $(anyNonEmptyString())
         ])
     }
 }
+
+

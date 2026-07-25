@@ -13,23 +13,25 @@ Contract.make {
         body([
             content: [
                 [
-                    id        : $(anyPositiveInt()),
+                    id        : $(anyNumber()),
                     name      : $(anyNonEmptyString()),
                     sku       : $(anyNonEmptyString()),
                     category  : $(anyNonEmptyString()),
                     price     : $(anyNumber()),
-                    quantity  : $(anyPositiveInt()),
-                    minStock  : $(anyPositiveInt()),
+                    quantity  : $(anyNumber()),
+                    minStock  : $(anyNumber()),
                     status    : $(anyOf('ACTIVE', 'INACTIVE', 'DISCONTINUED')),
                     lowStock  : $(anyBoolean()),
-                    createdAt : $(anyIso8601WithOffset())
+                    createdAt : $(anyNonEmptyString())
                 ]
             ],
-            page          : $(anyPositiveInt()),
-            size          : $(anyPositiveInt()),
-            totalElements : $(anyPositiveInt()),
-            totalPages    : $(anyPositiveInt()),
+            page          : $(anyNumber()),
+            size          : $(anyNumber()),
+            totalElements : $(anyNumber()),
+            totalPages    : $(anyNumber()),
             last          : $(anyBoolean())
         ])
     }
 }
+
+

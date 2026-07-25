@@ -1,12 +1,16 @@
 package proyecto.sistemaGestion.contract;
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import org.springframework.boot.test.web.server.LocalServerPort;
+
+
+import io.restassured.RestAssured;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import proyecto.sistemaGestion.config.TestSecurityConfig;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.context.WebApplicationContext;
 import proyecto.sistemaGestion.dto.PageResponse;
 import proyecto.sistemaGestion.dto.ProductResponse;
 import proyecto.sistemaGestion.enums.ProductStatus;
@@ -20,19 +24,22 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
-public abstract class ExternalProductContractBase {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-    @Autowired
-    private WebApplicationContext context;
+@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
+public abstract class ExternalProductContractBase {
 
     @MockitoBean
     private ProductService productService;
 
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     public void setup() {
-        RestAssuredMockMvc.webAppContextSetup(context);
+        RestAssured.baseURI = "http://localhost:" + port;
+        
 
         ProductResponse defaultResponse = ProductResponse.builder()
                 .id(1L).name("Laptop").sku("LAP-001").description("Test")
@@ -50,3 +57,20 @@ public abstract class ExternalProductContractBase {
         when(productService.findById(99L)).thenThrow(new ResourceNotFoundException("Product not found"));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

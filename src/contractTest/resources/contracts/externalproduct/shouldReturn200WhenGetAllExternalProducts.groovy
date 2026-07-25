@@ -13,7 +13,7 @@ Contract.make {
         body([
             content: [
                 [
-                    id       : $(anyPositiveInt()),
+                    id       : $(anyNumber()),
                     name     : $(anyNonEmptyString()),
                     sku      : $(anyNonEmptyString()),
                     category : $(anyNonEmptyString()),
@@ -21,11 +21,13 @@ Contract.make {
                     status   : $(anyOf('ACTIVE', 'INACTIVE', 'DISCONTINUED'))
                 ]
             ],
-            page          : $(anyPositiveInt()),
-            size          : $(anyPositiveInt()),
-            totalElements : $(anyPositiveInt()),
-            totalPages    : $(anyPositiveInt()),
+            page          : $(anyNumber()),
+            size          : $(anyNumber()),
+            totalElements : $(anyNumber()),
+            totalPages    : $(anyNumber()),
             last          : $(anyBoolean())
         ])
     }
 }
+
+

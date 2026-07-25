@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "security.enabled", havingValue = "true", matchIfMissing = true)
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {

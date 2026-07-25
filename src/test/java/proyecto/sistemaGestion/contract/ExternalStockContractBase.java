@@ -1,12 +1,16 @@
 package proyecto.sistemaGestion.contract;
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.RestAssured;
+
+
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import proyecto.sistemaGestion.config.TestSecurityConfig;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.context.WebApplicationContext;
+
 import proyecto.sistemaGestion.dto.PageResponse;
 import proyecto.sistemaGestion.dto.StockMovementResponse;
 import proyecto.sistemaGestion.enums.MovementType;
@@ -19,19 +23,22 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
-public abstract class ExternalStockContractBase {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-    @Autowired
-    private WebApplicationContext context;
+@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
+public abstract class ExternalStockContractBase {
 
     @MockitoBean
     private StockMovementService stockMovementService;
 
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     public void setup() {
-        RestAssuredMockMvc.webAppContextSetup(context);
+        RestAssured.baseURI = "http://localhost:" + port;
+        
 
         StockMovementResponse defaultResponse = StockMovementResponse.builder()
                 .id(1L).productId(1L).productName("Laptop").productSku("LAP-001")
@@ -46,3 +53,19 @@ public abstract class ExternalStockContractBase {
                         .page(0).size(20).totalElements(1).totalPages(1).last(true).build());
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

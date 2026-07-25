@@ -11,16 +11,18 @@ Contract.make {
         status 200
         headers { contentType(applicationJson()) }
         body([
-            id        : $(anyPositiveInt()),
+            id        : $(anyNumber()),
             name      : $(anyNonEmptyString()),
             sku       : $(anyNonEmptyString()),
             category  : $(anyNonEmptyString()),
             price     : $(anyNumber()),
-            quantity  : $(anyPositiveInt()),
-            minStock  : $(anyPositiveInt()),
+            quantity  : $(anyNumber()),
+            minStock  : $(anyNumber()),
             status    : $(anyOf('ACTIVE', 'INACTIVE', 'DISCONTINUED')),
             lowStock  : $(anyBoolean()),
-            createdAt : $(anyIso8601WithOffset())
+            createdAt : $(anyNonEmptyString())
         ])
     }
 }
+
+

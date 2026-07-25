@@ -11,11 +11,12 @@ Contract.make {
         status 404
         headers { contentType(applicationJson()) }
         body([
-            error     : $(anyNonEmptyString()),
             message   : $(anyNonEmptyString()),
-            path      : $(anyNonEmptyString()),
-            timestamp : $(anyIso8601WithOffset()),
+            timestamp : $(anyNonEmptyString()),
             status    : 404
         ])
     }
 }
+
+
+

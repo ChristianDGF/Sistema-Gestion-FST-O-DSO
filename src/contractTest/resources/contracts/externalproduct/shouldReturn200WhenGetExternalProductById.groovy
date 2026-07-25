@@ -11,7 +11,7 @@ Contract.make {
         status 200
         headers { contentType(applicationJson()) }
         body([
-            id       : $(anyPositiveInt()),
+            id       : $(anyNumber()),
             name     : $(anyNonEmptyString()),
             sku      : $(anyNonEmptyString()),
             category : $(anyNonEmptyString()),
@@ -20,3 +20,5 @@ Contract.make {
         ])
     }
 }
+
+

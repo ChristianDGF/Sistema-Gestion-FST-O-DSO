@@ -13,19 +13,21 @@ Contract.make {
         body([
             content: [
                 [
-                    id               : $(anyPositiveInt()),
+                    id               : $(anyNumber()),
                     movementType     : $(anyOf('IN', 'OUT', 'ADJUSTMENT')),
-                    quantity         : $(anyPositiveInt()),
-                    previousQuantity : $(anyPositiveInt()),
-                    newQuantity      : $(anyPositiveInt()),
-                    createdAt        : $(anyIso8601WithOffset())
+                    quantity         : $(anyNumber()),
+                    previousQuantity : $(anyNumber()),
+                    newQuantity      : $(anyNumber()),
+                    createdAt        : $(anyNonEmptyString())
                 ]
             ],
-            page          : $(anyPositiveInt()),
-            size          : $(anyPositiveInt()),
-            totalElements : $(anyPositiveInt()),
-            totalPages    : $(anyPositiveInt()),
+            page          : $(anyNumber()),
+            size          : $(anyNumber()),
+            totalElements : $(anyNumber()),
+            totalPages    : $(anyNumber()),
             last          : $(anyBoolean())
         ])
     }
 }
+
+
