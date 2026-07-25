@@ -29,9 +29,9 @@ pipeline {
             }
         }
 
-        stage('Run Unit Tests') {
+        stage('Run Unit & Contract Tests') {
             steps {
-                sh './gradlew test --no-daemon --parallel'
+                sh './gradlew generateContractTests test --no-daemon --parallel'
             }
             post {
                 always {
@@ -53,7 +53,7 @@ pipeline {
         stage('SonarCloud Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    sh './gradlew test jacocoTestReport sonar -Dsonar.token=${SONAR_TOKEN} --no-daemon'
+                    sh './gradlew generateContractTests test jacocoTestReport sonar -Dsonar.token=${SONAR_TOKEN} --no-daemon'
                 }
             }
         }
