@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "contract-test"})
 @Import(TestSecurityConfig.class)
 public abstract class StockMovementContractBase {
 
@@ -65,6 +65,7 @@ public abstract class StockMovementContractBase {
                         .page(0).size(20).totalElements(1).totalPages(1).last(true).build());
     }
 }
+
 
 
 

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "contract-test"})
 @Import(TestSecurityConfig.class)
 public abstract class ExternalProductContractBase {
 
@@ -57,6 +57,7 @@ public abstract class ExternalProductContractBase {
         when(productService.findById(99L)).thenThrow(new ResourceNotFoundException("Product not found"));
     }
 }
+
 
 
 

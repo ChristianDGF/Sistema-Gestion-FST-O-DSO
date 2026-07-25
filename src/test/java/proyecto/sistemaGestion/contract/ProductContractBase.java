@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "contract-test"})
 @Import(TestSecurityConfig.class)
 public abstract class ProductContractBase {
 
@@ -63,6 +63,7 @@ public abstract class ProductContractBase {
         doNothing().when(productService).delete(1L);
     }
 }
+
 
 
 
