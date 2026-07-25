@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'jacoco'
+	id "org.sonarqube" version "5.1.0.4882"
 }
 
 group = 'proyecto'
@@ -88,5 +89,18 @@ jacocoTestCoverageVerification {
 				minimum = 0.60
 			}
 		}
+	}
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "ChristianDGF_Sistema-Gestion-FST-O-DSO"
+		property "sonar.organization", "christiandgf"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+		property "sonar.java.source", "21"
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.exclusions", "**/dto/**, **/entity/**, **/enums/**, **/SistemaGestionApplication.java"
+		property "sonar.cpd.exclusions", "**/dto/**, **/entity/**"
 	}
 }
