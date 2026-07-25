@@ -6,7 +6,7 @@
     <!-- =========================================================== -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId} spanId=%X{spanId} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId} spanId=%X{spanId} correlationId=%X{correlationId} user=%X{user} endpoint=%X{endpoint} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -24,7 +24,7 @@
                 <label>
                     <!-- Etiquetas que Loki indexa y por las que se puede filtrar -->
                     <!-- traceId como label permite correlación directa Log→Traza en Grafana -->
-                    <pattern>app=${spring.application.name:-sistemaGestion},env=${spring.profiles.active:-local},level=%level,host=${HOSTNAME:-localhost},traceId=%X{traceId:-none}</pattern>
+                    <pattern>app=${spring.application.name:-sistemaGestion},env=${spring.profiles.active:-local},level=%level,host=${HOSTNAME:-localhost},traceId=%X{traceId:-none},correlationId=%X{correlationId:-none}</pattern>
                 </label>
                 <message>
                     <!-- Mensaje en JSON estructurado para facilitar búsquedas -->
@@ -36,6 +36,9 @@
                           "logger": "%logger{36}",
                           "traceId": "%X{traceId:-none}",
                           "spanId": "%X{spanId:-none}",
+                          "correlationId": "%X{correlationId:-none}",
+                          "user": "%X{user:-anonymous}",
+                          "endpoint": "%X{endpoint:-none}",
                           "message": "%message",
                           "exception": "%ex{5}"
                         }

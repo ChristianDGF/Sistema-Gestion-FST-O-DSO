@@ -33,7 +33,8 @@ public class SecurityConfig {
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
             )
-            .addFilterAfter(new ExternalApiRateLimitFilter(), BearerTokenAuthenticationFilter.class);
+            .addFilterAfter(new ExternalApiRateLimitFilter(), BearerTokenAuthenticationFilter.class)
+            .addFilterAfter(new RequestContextMdcFilter(), ExternalApiRateLimitFilter.class);
 
         return http.build();
     }
