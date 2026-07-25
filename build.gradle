@@ -4,14 +4,27 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'jacoco'
 	id "org.sonarqube" version "5.1.0.4882"
+	id 'org.springframework.cloud.contract' version '4.2.0'
 }
 
 group = 'proyecto'
 version = '0.0.1-SNAPSHOT'
 
+ext['groovy.version'] = '4.0.24'
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+
+
+configurations.all {
+	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+		if (details.requested.group == 'io.rest-assured') {
+			details.useVersion '5.5.2'
+		}
 	}
 }
 
@@ -55,7 +68,10 @@ dependencies {
 	testImplementation 'org.testcontainers:testcontainers'
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:junit-jupiter'
+	contractTestImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier:4.2.0'
 
+	testImplementation 'io.rest-assured:rest-assured'
+	testImplementation 'io.rest-assured:spring-mock-mvc'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	testRuntimeOnly 'com.h2database:h2'
@@ -104,3 +120,38 @@ sonar {
 		property "sonar.cpd.exclusions", "**/dto/**, **/entity/**"
 	}
 }
+
+contracts {
+	packageWithBaseClasses = 'proyecto.sistemaGestion.contract'
+	failOnNoContracts = false
+	testFramework = 'JUNIT5'
+	testMode = 'EXPLICIT'
+	baseClassMappings {
+		baseClassMapping(".*externalproduct.*", "proyecto.sistemaGestion.contract.ExternalProductContractBase")
+		baseClassMapping(".*externalstock.*", "proyecto.sistemaGestion.contract.ExternalStockContractBase")
+		baseClassMapping(".*stockmovement.*", "proyecto.sistemaGestion.contract.StockMovementContractBase")
+		baseClassMapping(".*product.*", "proyecto.sistemaGestion.contract.ProductContractBase")
+	}
+}
+
+tasks.register('printRestAssuredMethods') {
+	dependsOn contractTestClasses
+	doLast {
+		def cp = configurations.contractTestRuntimeClasspath.files*.toURI()*.toURL() as java.net.URL[]
+		def loader = new java.net.URLClassLoader(cp, null)
+		def clazz = loader.loadClass("io.restassured.module.mockmvc.specification.MockMvcRequestSender")
+		println "METHODS FOR " + clazz.getName() + " from " + clazz.getProtectionDomain().getCodeSource().getLocation()
+		for (def iface : clazz.getInterfaces()) {
+			println "  extends " + iface.getName()
+			for (def m : iface.getDeclaredMethods()) {
+				if (m.getName() == "get") {
+					println "    " + m.toString()
+				}
+			}
+		}
+	}
+}
+
+
+
+
