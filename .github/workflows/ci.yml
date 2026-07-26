@@ -27,7 +27,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Run Build and Tests (Unit, Contract & Integration)
+    - name: Run Build and Tests (Unit, Contract, Integration & Data)
       run: ./gradlew build generateContractTests test jacocoTestReport jacocoTestCoverageVerification --no-daemon
 
     - name: Upload Test Report
