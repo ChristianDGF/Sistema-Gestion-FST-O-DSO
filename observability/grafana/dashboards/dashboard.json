@@ -482,6 +482,154 @@
           "maxLines": 200
         }
       ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 63 },
+      "id": 104,
+      "title": "Negocio",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 64 },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "title": "Productos Creados (por segundo)",
+      "description": "Tasa de creación de productos nuevos en el inventario.",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(inventory_products_creations_total{application=\"sistemaGestion\"}[5m]))",
+          "legendFormat": "Productos creados",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "stacking": { "mode": "normal" }
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 64 },
+      "id": 17,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "title": "Movimientos de Stock por Tipo",
+      "description": "Tasa de movimientos de inventario (IN, OUT, ADJUSTMENT) por tipo.",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (type) (rate(inventory_movements_total{application=\"sistemaGestion\"}[5m]))",
+          "legendFormat": "{{type}}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 72 },
+      "id": 105,
+      "title": "Seguridad",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "lineWidth": 1,
+            "stacking": { "mode": "normal" }
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 73 },
+      "id": 18,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "title": "Accesos Denegados (401 / 403) por segundo",
+      "description": "Tasa de respuestas HTTP 401 (no autenticado) y 403 (no autorizado).",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{application=\"sistemaGestion\", status=~\"401|403\"}[5m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 73 },
+      "id": 19,
+      "options": { "showHeader": true },
+      "title": "Accesos Denegados por Endpoint (últimos 30 min)",
+      "description": "Total de respuestas 401/403 agrupadas por endpoint y código de estado.",
+      "type": "table",
+      "targets": [
+        {
+          "expr": "sum by (uri, status) (increase(http_server_requests_seconds_count{application=\"sistemaGestion\", status=~\"401|403\"}[30m]))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 81 },
+      "id": 106,
+      "title": "Alertas",
+      "type": "row"
+    },
+    {
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 82 },
+      "id": 20,
+      "title": "Estado de Alertas (Grafana Alerting)",
+      "description": "Estado en vivo de las reglas de alerta provisionadas (CPU, error rate, latencia, servicio caído, fallos de autenticación).",
+      "type": "alertlist",
+      "options": {
+        "alertName": "",
+        "alertInstanceLabelFilter": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": false,
+          "normal": true,
+          "pending": true
+        },
+        "viewMode": "list"
+      }
     }
   ],
   "schemaVersion": 39,

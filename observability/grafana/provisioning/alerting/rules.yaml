@@ -1,0 +1,156 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: sistema-gestion-alerts
+    folder: Sistema de Gestion
+    interval: 1m
+    rules:
+      - uid: sg-cpu-high
+        title: CPU alto
+        condition: C
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "El uso de CPU de la aplicación supera el 80% desde hace 5 minutos."
+        noDataState: NoData
+        execErrState: Error
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              refId: A
+              expr: system_cpu_usage{application="sistemaGestion"} * 100
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: classic_conditions
+              conditions:
+                - evaluator: { type: gt, params: [80] }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last, params: [] }
+
+      - uid: sg-error-rate-high
+        title: Error rate elevado
+        condition: C
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Más del 5% de las peticiones HTTP están devolviendo 5xx en los últimos 5 minutos."
+        noDataState: NoData
+        execErrState: Error
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              refId: A
+              instant: true
+              expr: >-
+                100 * sum(rate(http_server_requests_seconds_count{application="sistemaGestion", status=~"5.."}[5m]))
+                / sum(rate(http_server_requests_seconds_count{application="sistemaGestion"}[5m]))
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: classic_conditions
+              conditions:
+                - evaluator: { type: gt, params: [5] }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last, params: [] }
+
+      - uid: sg-latency-high
+        title: Latencia alta
+        condition: C
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "La latencia p95 de las peticiones HTTP supera 1 segundo desde hace 5 minutos."
+        noDataState: NoData
+        execErrState: Error
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              refId: A
+              instant: true
+              expr: >-
+                histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application="sistemaGestion"}[5m])) by (le))
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: classic_conditions
+              conditions:
+                - evaluator: { type: gt, params: [1] }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last, params: [] }
+
+      - uid: sg-service-down
+        title: Servicio caído
+        condition: C
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "El scrape target spring-boot-app no responde (up == 0)."
+        noDataState: Alerting
+        execErrState: Error
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              refId: A
+              instant: true
+              expr: up{job="spring-boot-app"}
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: classic_conditions
+              conditions:
+                - evaluator: { type: lt, params: [1] }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last, params: [] }
+
+      - uid: sg-auth-failures
+        title: Fallos de autenticación
+        condition: C
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Más de 5 respuestas 401/403 en los últimos 5 minutos."
+        noDataState: NoData
+        execErrState: Error
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              refId: A
+              instant: true
+              expr: >-
+                sum(increase(http_server_requests_seconds_count{application="sistemaGestion", status=~"401|403"}[5m]))
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: classic_conditions
+              conditions:
+                - evaluator: { type: gt, params: [5] }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last, params: [] }
