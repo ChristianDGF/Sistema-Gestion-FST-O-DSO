@@ -29,8 +29,11 @@ pipeline {
             }
         }
 
-        stage('Run Unit & Contract Tests') {
+        stage('Run Unit, Contract & Data Tests') {
             steps {
+                // 'test' also includes proyecto.sistemaGestion.data.* (migrations, DB constraints,
+                // referential integrity, duplicate data and seeds), run with Flyway enabled
+                // against a real Postgres Testcontainer instead of the H2/ddl-auto used above.
                 sh './gradlew generateContractTests test --no-daemon --parallel'
             }
             post {
@@ -43,7 +46,7 @@ pipeline {
                             keepAll: true,
                             reportDir: 'build/reports/tests/test',
                             reportFiles: 'index.html',
-                            reportName: 'Unit Test Report'
+                            reportName: 'Unit & Data Test Report'
                         ]
                     )
                 }
