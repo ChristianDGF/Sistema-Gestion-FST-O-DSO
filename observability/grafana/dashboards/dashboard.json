@@ -598,6 +598,38 @@
           "refId": "A"
         }
       ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 81 },
+      "id": 106,
+      "title": "Alertas",
+      "type": "row"
+    },
+    {
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 82 },
+      "id": 20,
+      "title": "Estado de Alertas (Grafana Alerting)",
+      "description": "Estado en vivo de las reglas de alerta provisionadas (CPU, error rate, latencia, servicio caído, fallos de autenticación).",
+      "type": "alertlist",
+      "options": {
+        "alertName": "",
+        "alertInstanceLabelFilter": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": false,
+          "normal": true,
+          "pending": true
+        },
+        "viewMode": "list"
+      }
     }
   ],
   "schemaVersion": 39,
