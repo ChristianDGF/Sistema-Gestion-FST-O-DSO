@@ -101,6 +101,64 @@ pipeline {
             }
         }
 
+        stage('Security Scan') {
+            steps {
+                script {
+                    // Requires the NVD_API_KEY env var / credential to avoid NVD rate limiting.
+                    sh './gradlew dependencyCheckAnalyze --no-daemon'
+
+                    dir("${FRONTEND_DIR}") {
+                        sh 'npm run audit'
+                    }
+
+                    try {
+                        sh 'docker-compose up -d db keycloak'
+                        sleep 15
+                        sh 'docker-compose up -d app frontend'
+                        sleep 15
+                        sh 'mkdir -p zap-reports'
+                        sh '''
+                            docker run --rm \
+                                -v "$WORKSPACE/.zap:/zap/wrk/config:ro" \
+                                -v "$WORKSPACE/zap-reports:/zap/wrk/:rw" \
+                                --network host ghcr.io/zaproxy/zaproxy:stable \
+                                zap-baseline.py -t http://localhost:5173 \
+                                -r zap-frontend-report.html -J zap-frontend-report.json \
+                                -c config/rules.tsv -a || true
+                            docker run --rm \
+                                -v "$WORKSPACE/.zap:/zap/wrk/config:ro" \
+                                -v "$WORKSPACE/zap-reports:/zap/wrk/:rw" \
+                                --network host ghcr.io/zaproxy/zaproxy:stable \
+                                zap-baseline.py -t http://localhost:8081/swagger-ui.html \
+                                -r zap-backend-report.html -J zap-backend-report.json \
+                                -c config/rules.tsv -a || true
+                        '''
+                    } finally {
+                        sh 'docker-compose down'
+                    }
+                }
+            }
+            post {
+                always {
+                    publishHTML(
+                        target: [
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'build/reports/dependency-check',
+                            reportFiles: 'dependency-check-report.html',
+                            reportName: 'Dependency-Check Report'
+                        ]
+                    )
+                    archiveArtifacts(
+                        artifacts: 'zap-reports/**',
+                        fingerprint: true,
+                        allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
         stage('Docker Build') {
             when {
                 expression { env.BUILD_DOCKER == 'true' }
