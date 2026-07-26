@@ -70,6 +70,7 @@ dependencies {
 	testImplementation 'org.testcontainers:testcontainers'
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'com.github.dasniko:testcontainers-keycloak:3.9.1'
 	contractTestImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier:4.2.0'
 
 	testImplementation 'io.rest-assured:rest-assured'
