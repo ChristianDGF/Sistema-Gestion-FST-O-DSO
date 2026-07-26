@@ -38,3 +38,6 @@ out/
 
 ### Security scan output ###
 zap-reports/
+
+### Performance test output ###
+performance-tests/reports/
