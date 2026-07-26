@@ -2,9 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import api from '../api/axios';
 import {
   ShieldCheck, BarChart3, Package, Activity,
-  ChevronLeft, ChevronRight, RefreshCw, TrendingUp,
+  RefreshCw, TrendingUp,
   Clock, Calendar, Database, AlertCircle
 } from 'lucide-react';
+import Pagination from '../components/Pagination';
+import EmptyState from '../components/EmptyState';
+import BarGroup from '../components/charts/BarGroup';
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -44,60 +47,12 @@ const Spinner = () => (
   </div>
 );
 
-const EmptyState = ({ message = 'Sin registros de auditoría' }) => (
-  <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-    <Database className="w-12 h-12 mb-3 opacity-40" />
-    <p className="text-sm">{message}</p>
-  </div>
-);
-
-const Pagination = ({ page, totalPages, onPage }) => (
-  <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50">
-    <span className="text-sm text-gray-500">Página {page + 1} de {Math.max(totalPages, 1)}</span>
-    <div className="flex gap-2">
-      <button
-        onClick={() => onPage(page - 1)}
-        disabled={page === 0}
-        className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-white transition-colors"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </button>
-      <button
-        onClick={() => onPage(page + 1)}
-        disabled={page + 1 >= totalPages}
-        className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-white transition-colors"
-      >
-        <ChevronRight className="w-4 h-4" />
-      </button>
-    </div>
-  </div>
-);
-
 const formatDate = (ts) => {
   if (!ts) return '—';
   return new Date(ts).toLocaleString('es-DO', {
     year: 'numeric', month: 'short', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   });
-};
-
-// ─────────────────────────────────────────────────────────────
-// Mini bar chart (sin librerías externas)
-// ─────────────────────────────────────────────────────────────
-const BarGroup = ({ label, value, max, color }) => {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className="flex items-center gap-3 group">
-      <span className="w-20 text-xs text-gray-500 text-right shrink-0">{label}</span>
-      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-        <div
-          className={`h-3 rounded-full transition-all duration-700 ease-out ${color}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="w-10 text-xs font-semibold text-gray-700 text-right">{value?.toLocaleString()}</span>
-    </div>
-  );
 };
 
 // ─────────────────────────────────────────────────────────────
