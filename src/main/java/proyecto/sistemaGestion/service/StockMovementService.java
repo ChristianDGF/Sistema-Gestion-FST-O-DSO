@@ -1,5 +1,6 @@
 package proyecto.sistemaGestion.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ public class StockMovementService {
 
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public StockMovementResponse registerMovement(StockMovementRequest request) {
@@ -72,6 +74,7 @@ public class StockMovementService {
                 .build();
 
         movement = stockMovementRepository.save(movement);
+        meterRegistry.counter("inventory.movements.total", "type", movement.getMovementType().name()).increment();
         return toResponse(movement);
     }
 

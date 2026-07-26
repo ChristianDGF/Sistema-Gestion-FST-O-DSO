@@ -1,5 +1,6 @@
 package proyecto.sistemaGestion.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final StockMovementRepository stockMovementRepository;
+    private final MeterRegistry meterRegistry;
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> findAll(int page, int size, String sortBy, String sortDir,
@@ -77,6 +79,7 @@ public class ProductService {
                 .build();
 
         product = productRepository.save(product);
+        meterRegistry.counter("inventory.products.created").increment();
         return toResponse(product);
     }
 
