@@ -151,18 +151,21 @@ jobs:
           docker compose up -d app frontend
           sleep 15
 
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
+
       - name: Run k6 smoke scenario
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/run-k6-action@v1
         with:
-          filename: performance-tests/scenarios/smoke.js
+          path: performance-tests/scenarios/smoke.js
         env:
           BASE_URL: http://localhost:8081
           KEYCLOAK_URL: http://localhost:8080
 
       - name: Run k6 load scenario
-        uses: grafana/k6-action@v0.3.1
+        uses: grafana/run-k6-action@v1
         with:
-          filename: performance-tests/scenarios/load.js
+          path: performance-tests/scenarios/load.js
         env:
           BASE_URL: http://localhost:8081
           KEYCLOAK_URL: http://localhost:8080
