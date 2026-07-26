@@ -2,18 +2,19 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Package, LogOut, Activity, ShieldCheck } from 'lucide-react';
 import { useKeycloak } from '../auth/KeycloakContext';
+import { PERMISSIONS } from '../config/permissions';
 import clsx from 'clsx';
 
 const Sidebar = () => {
   const { pathname } = useLocation();
-  const { logout } = useKeycloak();
+  const { logout, hasPermission } = useKeycloak();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Products', href: '/products', icon: Package },
-    { name: 'Stock Movements', href: '/stock-movements', icon: Activity },
-    { name: 'Auditoría', href: '/audit', icon: ShieldCheck },
-  ];
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard, permission: PERMISSIONS.REPORT_VIEW },
+    { name: 'Products', href: '/products', icon: Package, permission: PERMISSIONS.PRODUCT_VIEW },
+    { name: 'Stock Movements', href: '/stock-movements', icon: Activity, permission: PERMISSIONS.STOCK_VIEW },
+    { name: 'Auditoría', href: '/audit', icon: ShieldCheck, permission: PERMISSIONS.AUDIT_VIEW },
+  ].filter((item) => hasPermission(item.permission));
 
   return (
     <div className="flex flex-col w-64 h-screen bg-white border-r border-gray-200">

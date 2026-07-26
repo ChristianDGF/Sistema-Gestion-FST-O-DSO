@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, Search } from 'lucide-react';
 import StockMovementModal from '../components/StockMovementModal';
+import { useKeycloak } from '../auth/KeycloakContext';
+import { PERMISSIONS } from '../config/permissions';
 
 const StockMovements = () => {
+  const { hasPermission } = useKeycloak();
+  const canManageStock = hasPermission(PERMISSIONS.STOCK_MANAGE);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [movements, setMovements] = useState([]);
@@ -74,14 +78,16 @@ const StockMovements = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Stock Movements</h1>
-        <button 
-          onClick={handleRegisterMovement} 
-          disabled={!selectedProduct}
-          className={`btn-primary flex items-center ${!selectedProduct ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <Activity className="w-5 h-5 mr-2" />
-          Register Movement
-        </button>
+        {canManageStock && (
+          <button
+            onClick={handleRegisterMovement}
+            disabled={!selectedProduct}
+            className={`btn-primary flex items-center ${!selectedProduct ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <Activity className="w-5 h-5 mr-2" />
+            Register Movement
+          </button>
+        )}
       </div>
 
       <div className="card p-4">
