@@ -1,20 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Product CRUD Operations', () => {
   test.beforeEach(async ({ page }) => {
+    await loginAs(page, 'admin', 'admin123');
 
-    await page.goto('/');
-    
-    await page.waitForURL(/.*realms.*/, { timeout: 5000 }).catch(() => {});
-    
-    if (page.url().includes('realms')) {
-      await page.fill('#username', 'admin');
-      await page.fill('#password', 'admin123');
-      await page.click('#kc-login');
-      
-      await page.waitForURL('http://localhost:5173/');
-    }
-    
     await page.click('text=Products');
     await expect(page).toHaveURL(/.*products/);
   });
@@ -35,11 +25,15 @@ test.describe('Product CRUD Operations', () => {
     
     await page.click('button:has-text("Create Product")');
 
+    // The environment's product list can contain hundreds of unrelated rows,
+    // so filter down to the one this test just created before asserting on it.
+    await page.fill('input[placeholder="Search products..."]', sku);
+
     const productRow = page.locator('tr', { hasText: sku });
     await expect(productRow).toBeVisible();
 
     await productRow.locator('button').first().click();
-    
+
     await page.fill('input[name="price"]', '149.99');
     await page.click('button:has-text("Save Changes")');
 
