@@ -7,12 +7,16 @@ const KeycloakContext = createContext({
   login: () => {},
   logout: () => {},
   user: null,
+  permissions: [],
+  hasPermission: () => false,
+  hasAnyPermission: () => false,
 });
 
 export const KeycloakProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [permissions, setPermissions] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const isRun = React.useRef(false);
 
@@ -32,6 +36,7 @@ export const KeycloakProvider = ({ children }) => {
             username: keycloak.tokenParsed?.preferred_username,
             email: keycloak.tokenParsed?.email,
           });
+          setPermissions(keycloak.tokenParsed?.permissions || []);
         }
         setIsInitialized(true);
       })
@@ -44,6 +49,7 @@ export const KeycloakProvider = ({ children }) => {
       keycloak.updateToken(30).then((refreshed) => {
         if (refreshed) {
           setToken(keycloak.token);
+          setPermissions(keycloak.tokenParsed?.permissions || []);
         }
       }).catch(() => {
         console.error('Failed to refresh token');
@@ -51,6 +57,9 @@ export const KeycloakProvider = ({ children }) => {
       });
     };
   }, []);
+
+  const hasPermission = (scope) => permissions.includes(scope);
+  const hasAnyPermission = (scopes) => scopes.some(hasPermission);
 
   if (!isInitialized) {
     return (
@@ -68,6 +77,9 @@ export const KeycloakProvider = ({ children }) => {
         login: () => keycloak.login(),
         logout: () => keycloak.logout(),
         user,
+        permissions,
+        hasPermission,
+        hasAnyPermission,
       }}
     >
       {children}
