@@ -1,0 +1,16 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: default
+    receivers:
+      - uid: sg-default-receiver
+        type: webhook
+        # Sin canal real configurado todavía: las alertas quedan visibles en
+        # Grafana UI (Alerting > Alert rules) aunque la entrega del webhook falle.
+        # Reemplazar la URL por un endpoint real (Slack incoming webhook, etc.)
+        # cuando exista uno.
+        settings:
+          url: http://localhost:9999/observability/alerts-placeholder
+          httpMethod: POST
+        disableResolveMessage: false
