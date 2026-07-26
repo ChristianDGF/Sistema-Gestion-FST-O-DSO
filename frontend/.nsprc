@@ -1,0 +1,3 @@
+{
+  "GHSA-qwww-vcr4-c8h2": "React Router RSC-mode CSRF bypass. This SPA only uses BrowserRouter/Routes/Route (see src/App.jsx) with no RSC/framework mode or server actions, so the vulnerable code path is never reached. No non-vulnerable release exists yet on the react-router-dom 7.x line (the fix ships in react-router 8.x, which react-router-dom has not published). Re-evaluate when react-router-dom releases a patched version."
+}
