@@ -37,12 +37,16 @@ export function seedProducts(accessToken, count) {
 }
 
 // Cleans up everything created by seedProducts so staging stays in a repeatable state
-// between performance test runs.
+// between performance test runs. Best-effort: the API rejects deleting a product that
+// has stock movements associated with it (by design, for audit/traceability), and
+// scenarios do register movements against seeded products during the run - so a 400
+// here is an expected outcome, not a failure, and must not fail http_req_failed.
 export function teardownProducts(accessToken, ids) {
   ids.forEach((id) => {
     http.del(`${BASE_URL}/api/v1/products/${id}`, null, {
       ...authHeaders(accessToken),
       tags: { name: 'seed_delete_product' },
+      responseCallback: http.expectedStatuses(204, 400),
     });
   });
 }

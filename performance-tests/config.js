@@ -6,9 +6,20 @@ export const KEYCLOAK_URL = __ENV.KEYCLOAK_URL || 'http://localhost:8080';
 export const REALM = __ENV.KEYCLOAK_REALM || 'sistema-gestion';
 export const CLIENT_ID = __ENV.KEYCLOAK_CLIENT_ID || 'sistema-gestion-client';
 
+// Where handleSummary() writes HTML/JSON reports. k6 resolves this relative to its own
+// working directory (not the script's location), which differs by invocation context:
+// running "k6 run performance-tests/scenarios/x.js" from the repo root vs. running
+// inside the grafana/k6 Docker image with the folder mounted at /scripts. Override with
+// REPORTS_DIR when the working directory isn't the repo root (see Jenkinsfile).
+export const REPORTS_DIR = __ENV.REPORTS_DIR || 'performance-tests/reports';
+
+// Realm roles (keycloak/sistema-gestion-realm.json) are granular: "employee" only
+// carries product:view/stock:view. The traffic mix in lib/mix.js also exercises
+// product:manage/stock:manage (create product, register movement), so the default
+// test identity must be "admin", which holds every permission.
 export const TEST_USER = {
-  username: __ENV.PERF_TEST_USERNAME || 'employee',
-  password: __ENV.PERF_TEST_PASSWORD || 'employee123',
+  username: __ENV.PERF_TEST_USERNAME || 'admin',
+  password: __ENV.PERF_TEST_PASSWORD || 'admin123',
 };
 
 // Number of iterations a VU runs before it re-authenticates against Keycloak.

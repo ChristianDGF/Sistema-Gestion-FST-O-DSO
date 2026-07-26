@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { BASE_URL } from '../config.js';
+import { BASE_URL, TEST_USER } from '../config.js';
 import { login, authHeaders } from '../lib/auth.js';
 import { seedProducts, teardownProducts } from '../lib/seed.js';
 import { buildSummary } from '../lib/report.js';
@@ -57,7 +57,7 @@ export default function (data) {
       productId,
       movementType: 'IN',
       quantity: 5,
-      userId: 'employee',
+      userId: TEST_USER.username,
       observations: 'smoke test movement',
     }),
     { ...auth, tags: { name: 'register_movement' } }

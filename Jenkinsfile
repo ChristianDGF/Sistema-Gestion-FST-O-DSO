@@ -116,6 +116,7 @@ pipeline {
                                 -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
                                 -e BASE_URL=http://localhost:8081 \
                                 -e KEYCLOAK_URL=http://localhost:8080 \
+                                -e REPORTS_DIR=/scripts/reports \
                                 grafana/k6:latest run /scripts/scenarios/smoke.js
                         '''
                         sh '''
@@ -124,6 +125,7 @@ pipeline {
                                 -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
                                 -e BASE_URL=http://localhost:8081 \
                                 -e KEYCLOAK_URL=http://localhost:8080 \
+                                -e REPORTS_DIR=/scripts/reports \
                                 grafana/k6:latest run /scripts/scenarios/load.js
                         '''
 
@@ -136,6 +138,7 @@ pipeline {
                                     -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
                                     -e BASE_URL=http://localhost:8081 \
                                     -e KEYCLOAK_URL=http://localhost:8080 \
+                                    -e REPORTS_DIR=/scripts/reports \
                                     grafana/k6:latest run /scripts/scenarios/stress.js
                             '''
                         }

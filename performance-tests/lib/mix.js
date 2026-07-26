@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
-import { BASE_URL } from '../config.js';
+import { BASE_URL, TEST_USER } from '../config.js';
 import { authHeaders } from './auth.js';
 
 // Traffic mix modelled on real usage of ProductController/StockMovementController:
@@ -74,7 +74,7 @@ export function runAction(action, accessToken, productIds) {
           productId,
           movementType,
           quantity: 1 + Math.floor(Math.random() * 3),
-          userId: 'employee',
+          userId: TEST_USER.username,
           observations: 'perf-test generated movement',
         }),
         { ...auth, tags: { name: 'register_movement' } }
