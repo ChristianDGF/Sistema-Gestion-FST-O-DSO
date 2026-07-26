@@ -18,7 +18,9 @@ import proyecto.sistemaGestion.enums.MovementType;
 import proyecto.sistemaGestion.enums.ProductStatus;
 import proyecto.sistemaGestion.service.AuditService;
 import proyecto.sistemaGestion.service.DashboardService;
+import proyecto.sistemaGestion.service.KeycloakAdminService;
 import proyecto.sistemaGestion.service.ProductService;
+import proyecto.sistemaGestion.service.ReportService;
 import proyecto.sistemaGestion.service.StockMovementService;
 
 import java.math.BigDecimal;
@@ -60,6 +62,10 @@ class PermissionMatrixTest {
     private DashboardService dashboardService;
     @MockitoBean
     private AuditService auditService;
+    @MockitoBean
+    private ReportService reportService;
+    @MockitoBean
+    private KeycloakAdminService keycloakAdminService;
 
     @BeforeEach
     void setup() {
@@ -106,6 +112,23 @@ class PermissionMatrixTest {
         lenient().when(auditService.countProductRevisions(any())).thenReturn(0L);
         lenient().when(auditService.getMovementRevisions(anyInt(), anyInt(), any())).thenReturn(List.of());
         lenient().when(auditService.countMovementRevisions(any())).thenReturn(0L);
+
+        lenient().when(reportService.getInventoryValuationReport()).thenReturn(
+                InventoryValuationReportDTO.builder()
+                        .totalProducts(1).activeProducts(1).inactiveProducts(0).lowStockCount(0)
+                        .totalInventoryValue(BigDecimal.valueOf(1000)).byCategory(List.of()).build());
+        lenient().when(reportService.getStockMovementReport(any(), any(), any(), any())).thenReturn(
+                StockMovementReportDTO.builder()
+                        .startDate(LocalDateTime.now()).endDate(LocalDateTime.now())
+                        .totalMovements(0).byType(List.of()).movements(List.of()).build());
+
+        UserResponse user = UserResponse.builder()
+                .id("u1").username("admin").email("admin@sistema.com").enabled(true).role("admin").build();
+        lenient().when(keycloakAdminService.listUsers(anyInt(), anyInt(), any()))
+                .thenReturn(PageResponse.<UserResponse>builder().content(List.of(user))
+                        .page(0).size(20).totalElements(1).totalPages(1).last(true).build());
+        lenient().when(keycloakAdminService.createUser(any())).thenReturn(user);
+        lenient().when(keycloakAdminService.updateUser(any(), any())).thenReturn(user);
     }
 
     private static final String PRODUCT_PAYLOAD = """
@@ -113,6 +136,12 @@ class PermissionMatrixTest {
             """;
     private static final String MOVEMENT_PAYLOAD = """
             {"productId":1,"movementType":"IN","quantity":5,"userId":"user1"}
+            """;
+    private static final String USER_CREATE_PAYLOAD = """
+            {"username":"newuser","email":"new@sistema.com","password":"password123","role":"employee"}
+            """;
+    private static final String USER_UPDATE_PAYLOAD = """
+            {"email":"new@sistema.com","enabled":true,"role":"employee"}
             """;
 
     private static Stream<EndpointCase> endpoints() {
@@ -135,7 +164,19 @@ class PermissionMatrixTest {
                 new EndpointCase("GET /dashboard", () -> get("/api/v1/dashboard"), "report:view", 200),
                 new EndpointCase("GET /audit/stats", () -> get("/api/v1/audit/stats"), "audit:view", 200),
                 new EndpointCase("GET /audit/products", () -> get("/api/v1/audit/products"), "audit:view", 200),
-                new EndpointCase("GET /audit/movements", () -> get("/api/v1/audit/movements"), "audit:view", 200)
+                new EndpointCase("GET /audit/movements", () -> get("/api/v1/audit/movements"), "audit:view", 200),
+                new EndpointCase("GET /reports/inventory-valuation", () -> get("/api/v1/reports/inventory-valuation"), "report:view", 200),
+                new EndpointCase("GET /reports/stock-movements",
+                        () -> get("/api/v1/reports/stock-movements?startDate=2024-01-01&endDate=2024-01-31"),
+                        "report:view", 200),
+                new EndpointCase("GET /users", () -> get("/api/v1/users"), "user:manage", 200),
+                new EndpointCase("POST /users",
+                        () -> post("/api/v1/users").contentType(MediaType.APPLICATION_JSON).content(USER_CREATE_PAYLOAD),
+                        "user:manage", 201),
+                new EndpointCase("PUT /users/{id}",
+                        () -> put("/api/v1/users/u1").contentType(MediaType.APPLICATION_JSON).content(USER_UPDATE_PAYLOAD),
+                        "user:manage", 200),
+                new EndpointCase("DELETE /users/{id}", () -> delete("/api/v1/users/u1"), "user:manage", 204)
         );
     }
 

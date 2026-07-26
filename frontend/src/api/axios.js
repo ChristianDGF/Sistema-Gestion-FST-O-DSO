@@ -25,6 +25,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       keycloak.login();
+    } else if (error.response && error.response.status === 403) {
+      console.warn(`Forbidden: missing permission for ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
     }
     return Promise.reject(error);
   }

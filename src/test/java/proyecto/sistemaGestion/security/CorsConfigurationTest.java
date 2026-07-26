@@ -53,4 +53,15 @@ class CorsConfigurationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
     }
+
+    @Test
+    void preflight_shouldAllowTraceparentHeader_injectedByFrontendOtelInstrumentation() throws Exception {
+        mockMvc.perform(options("/api/v1/products")
+                        .header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN)
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "authorization,traceparent"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+                        org.hamcrest.Matchers.containsString("traceparent")));
+    }
 }
