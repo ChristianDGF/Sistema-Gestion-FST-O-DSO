@@ -512,7 +512,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(rate(inventory_products_created_total{application=\"sistemaGestion\"}[5m]))",
+          "expr": "sum(rate(inventory_products_creations_total{application=\"sistemaGestion\"}[5m]))",
           "legendFormat": "Productos creados",
           "refId": "A"
         }

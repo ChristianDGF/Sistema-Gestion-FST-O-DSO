@@ -79,7 +79,7 @@ public class ProductService {
                 .build();
 
         product = productRepository.save(product);
-        meterRegistry.counter("inventory.products.created").increment();
+        meterRegistry.counter("inventory.products.creations").increment();
         return toResponse(product);
     }
 
