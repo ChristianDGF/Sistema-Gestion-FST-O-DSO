@@ -5,6 +5,9 @@ on:
     branches: [ "main", "master", "development" ]
   pull_request:
     branches: [ "main", "master", "development" ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *' # nightly load test, doesn't block PRs
 
 jobs:
   build-and-test:
@@ -130,4 +133,48 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew generateContractTests test jacocoTestReport sonar --no-daemon
         continue-on-error: true
+
+  performance-tests:
+    name: Performance Testing (k6)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    # Heavy and slow - only runs on demand or nightly, never blocks a PR build.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Start staging-like environment
+        run: |
+          docker compose up -d db keycloak
+          sleep 15
+          docker compose up -d app frontend
+          sleep 15
+
+      - name: Run k6 smoke scenario
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: performance-tests/scenarios/smoke.js
+        env:
+          BASE_URL: http://localhost:8081
+          KEYCLOAK_URL: http://localhost:8080
+
+      - name: Run k6 load scenario
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: performance-tests/scenarios/load.js
+        env:
+          BASE_URL: http://localhost:8081
+          KEYCLOAK_URL: http://localhost:8080
+
+      - name: Upload k6 reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-performance-reports
+          path: performance-tests/reports/
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: docker compose down
 
