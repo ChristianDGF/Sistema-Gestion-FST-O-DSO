@@ -19,6 +19,16 @@ java {
 	}
 }
 
+sourceSets {
+	// Exposes keycloak/sistema-gestion-realm.json on the test classpath (as "sistema-gestion-realm.json")
+	// so integration tests import the same realm used by docker-compose.yml, with no duplicate copy to drift.
+	test {
+		resources {
+			srcDir 'keycloak'
+		}
+	}
+}
+
 
 
 configurations.all {
