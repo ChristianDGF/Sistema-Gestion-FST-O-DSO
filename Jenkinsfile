@@ -100,6 +100,74 @@ pipeline {
             }
         }
 
+        stage('Performance Testing (k6)') {
+            steps {
+                script {
+                    try {
+                        sh 'docker-compose up -d db keycloak'
+                        sleep 15
+                        sh 'docker-compose up -d app frontend'
+                        sleep 15
+                        sh 'mkdir -p performance-tests/reports'
+
+                        sh '''
+                            docker run --rm --network host \
+                                -v "$WORKSPACE/performance-tests:/scripts:ro" \
+                                -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
+                                -e BASE_URL=http://localhost:8081 \
+                                -e KEYCLOAK_URL=http://localhost:8080 \
+                                -e REPORTS_DIR=/scripts/reports \
+                                grafana/k6:latest run /scripts/scenarios/smoke.js
+                        '''
+                        sh '''
+                            docker run --rm --network host \
+                                -v "$WORKSPACE/performance-tests:/scripts:ro" \
+                                -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
+                                -e BASE_URL=http://localhost:8081 \
+                                -e KEYCLOAK_URL=http://localhost:8080 \
+                                -e REPORTS_DIR=/scripts/reports \
+                                grafana/k6:latest run /scripts/scenarios/load.js
+                        '''
+
+                        // Stress testing is resource-heavy and not meant to run on every build;
+                        // enable it explicitly via the RUN_STRESS_TEST job parameter/env var.
+                        if (env.RUN_STRESS_TEST == 'true') {
+                            sh '''
+                                docker run --rm --network host \
+                                    -v "$WORKSPACE/performance-tests:/scripts:ro" \
+                                    -v "$WORKSPACE/performance-tests/reports:/scripts/reports:rw" \
+                                    -e BASE_URL=http://localhost:8081 \
+                                    -e KEYCLOAK_URL=http://localhost:8080 \
+                                    -e REPORTS_DIR=/scripts/reports \
+                                    grafana/k6:latest run /scripts/scenarios/stress.js
+                            '''
+                        }
+                    } finally {
+                        sh 'docker-compose down'
+                    }
+                }
+            }
+            post {
+                always {
+                    publishHTML(
+                        target: [
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'performance-tests/reports',
+                            reportFiles: 'load-summary.html',
+                            reportName: 'k6 Load Test Report'
+                        ]
+                    )
+                    archiveArtifacts(
+                        artifacts: 'performance-tests/reports/**',
+                        fingerprint: true,
+                        allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
         stage('Security Scan') {
             steps {
                 script {
