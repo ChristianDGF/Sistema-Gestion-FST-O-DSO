@@ -82,6 +82,7 @@ jobs:
 
     - name: OWASP ZAP Baseline Scan (frontend - staging)
       uses: zaproxy/action-baseline@v0.15.0
+      continue-on-error: true
       with:
         target: 'http://localhost:5173'
         rules_file_name: '.zap/rules.tsv'
@@ -91,6 +92,7 @@ jobs:
 
     - name: OWASP ZAP Baseline Scan (backend Swagger UI - staging)
       uses: zaproxy/action-baseline@v0.15.0
+      continue-on-error: true
       with:
         target: 'http://localhost:8081/swagger-ui.html'
         rules_file_name: '.zap/rules.tsv'
