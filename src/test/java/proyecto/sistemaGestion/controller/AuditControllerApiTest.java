@@ -94,7 +94,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getStats_shouldReturn200() throws Exception {
         when(auditService.getAuditStats()).thenReturn(createStats());
 
@@ -109,7 +109,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getProductRevisions_shouldReturn200() throws Exception {
         when(auditService.getProductRevisions(anyInt(), anyInt(), isNull()))
                 .thenReturn(List.of(createProductRevision(1L)));
@@ -127,7 +127,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getProductRevisions_shouldReturn200_withEntityId() throws Exception {
         when(auditService.getProductRevisions(anyInt(), anyInt(), eq(1L)))
                 .thenReturn(List.of(createProductRevision(1L)));
@@ -140,7 +140,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getProductRevisions_shouldReturn200_whenEmpty() throws Exception {
         when(auditService.getProductRevisions(anyInt(), anyInt(), isNull()))
                 .thenReturn(List.of());
@@ -154,7 +154,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getMovementRevisions_shouldReturn200() throws Exception {
         when(auditService.getMovementRevisions(anyInt(), anyInt(), isNull()))
                 .thenReturn(List.of(createMovementRevision(1L)));
@@ -172,7 +172,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getMovementRevisions_shouldReturn200_withEntityId() throws Exception {
         when(auditService.getMovementRevisions(anyInt(), anyInt(), eq(1L)))
                 .thenReturn(List.of(createMovementRevision(1L)));
@@ -185,7 +185,7 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_report:view")
+    @WithMockUser(authorities = "SCOPE_audit:view")
     void getMovementRevisions_shouldReturn200_whenEmpty() throws Exception {
         when(auditService.getMovementRevisions(anyInt(), anyInt(), isNull()))
                 .thenReturn(List.of());
@@ -199,22 +199,22 @@ class AuditControllerApiTest {
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_product:view")
-    void getStats_shouldReturn403_whenNoPermission() throws Exception {
+    @WithMockUser(authorities = "SCOPE_report:view")
+    void getStats_shouldReturn403_whenCallerOnlyHasReportView() throws Exception {
         mockMvc.perform(get("/api/v1/audit/stats"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_product:view")
-    void getProductRevisions_shouldReturn403_whenNoPermission() throws Exception {
+    @WithMockUser(authorities = "SCOPE_report:view")
+    void getProductRevisions_shouldReturn403_whenCallerOnlyHasReportView() throws Exception {
         mockMvc.perform(get("/api/v1/audit/products"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(authorities = "SCOPE_product:view")
-    void getMovementRevisions_shouldReturn403_whenNoPermission() throws Exception {
+    @WithMockUser(authorities = "SCOPE_report:view")
+    void getMovementRevisions_shouldReturn403_whenCallerOnlyHasReportView() throws Exception {
         mockMvc.perform(get("/api/v1/audit/movements"))
                 .andExpect(status().isForbidden());
     }
