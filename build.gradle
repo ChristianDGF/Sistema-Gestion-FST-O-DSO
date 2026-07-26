@@ -19,6 +19,16 @@ java {
 	}
 }
 
+sourceSets {
+	// Exposes keycloak/sistema-gestion-realm.json on the test classpath (as "sistema-gestion-realm.json")
+	// so integration tests import the same realm used by docker-compose.yml, with no duplicate copy to drift.
+	test {
+		resources {
+			srcDir 'keycloak'
+		}
+	}
+}
+
 
 
 configurations.all {
@@ -70,6 +80,7 @@ dependencies {
 	testImplementation 'org.testcontainers:testcontainers'
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'com.github.dasniko:testcontainers-keycloak:3.9.1'
 	contractTestImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier:4.2.0'
 
 	testImplementation 'io.rest-assured:rest-assured'
