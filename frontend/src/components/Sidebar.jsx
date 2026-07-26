@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, LogOut, Activity, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Package, LogOut, Activity, ShieldCheck, BarChart3, Users as UsersIcon } from 'lucide-react';
 import { useKeycloak } from '../auth/KeycloakContext';
 import { PERMISSIONS } from '../config/permissions';
 import clsx from 'clsx';
@@ -14,6 +14,8 @@ const Sidebar = () => {
     { name: 'Products', href: '/products', icon: Package, permission: PERMISSIONS.PRODUCT_VIEW },
     { name: 'Stock Movements', href: '/stock-movements', icon: Activity, permission: PERMISSIONS.STOCK_VIEW },
     { name: 'Auditoría', href: '/audit', icon: ShieldCheck, permission: PERMISSIONS.AUDIT_VIEW },
+    { name: 'Reportes', href: '/reports', icon: BarChart3, permission: PERMISSIONS.REPORT_VIEW },
+    { name: 'Usuarios', href: '/users', icon: UsersIcon, permission: PERMISSIONS.USER_MANAGE },
   ].filter((item) => hasPermission(item.permission));
 
   return (

@@ -6,6 +6,8 @@ import Products from './pages/Products';
 
 import StockMovements from './pages/StockMovements';
 import Audit from './pages/Audit';
+import Reports from './pages/Reports';
+import Users from './pages/Users';
 import RequirePermission from './components/RequirePermission';
 import { PERMISSIONS } from './config/permissions';
 
@@ -43,6 +45,22 @@ function App() {
             element={
               <RequirePermission permission={PERMISSIONS.AUDIT_VIEW}>
                 <Audit />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <RequirePermission permission={PERMISSIONS.REPORT_VIEW}>
+                <Reports />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <RequirePermission permission={PERMISSIONS.USER_MANAGE}>
+                <Users />
               </RequirePermission>
             }
           />
