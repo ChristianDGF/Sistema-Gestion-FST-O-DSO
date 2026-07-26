@@ -41,6 +41,27 @@ jobs:
         name: coverage-report
         path: build/reports/jacoco/
 
+    - name: OWASP Dependency-Check (backend SCA)
+      env:
+        NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      run: ./gradlew dependencyCheckAnalyze --no-daemon
+      continue-on-error: true
+
+    - name: Upload Dependency-Check Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-check-report
+        path: build/reports/dependency-check/
+
+    - name: Frontend Install Dependencies
+      working-directory: frontend
+      run: npm ci
+
+    - name: Frontend npm audit (SCA)
+      working-directory: frontend
+      run: npm run audit
+
     - name: Run E2E Tests (Playwright)
       run: |
         docker compose up -d db keycloak
@@ -48,10 +69,27 @@ jobs:
         docker compose up -d app frontend
         sleep 15
         cd frontend
-        npm ci
         npx playwright install --with-deps chromium
         npm run test:e2e
       continue-on-error: true
+
+    - name: OWASP ZAP Baseline Scan (frontend - staging)
+      uses: zaproxy/action-baseline@v0.15.0
+      with:
+        target: 'http://localhost:5173'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+        allow_issue_writing: false
+        artifact_name: 'zap-frontend-report'
+
+    - name: OWASP ZAP Baseline Scan (backend Swagger UI - staging)
+      uses: zaproxy/action-baseline@v0.15.0
+      with:
+        target: 'http://localhost:8081/swagger-ui.html'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+        allow_issue_writing: false
+        artifact_name: 'zap-backend-report'
 
     - name: Tear down Docker Compose
       if: always()
