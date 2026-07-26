@@ -90,7 +90,6 @@ pipeline {
                         sh 'docker-compose up -d app frontend'
                         sleep 15
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm ci'
                             sh 'npx playwright install --with-deps chromium'
                             sh 'npm run test:e2e'
                         }
