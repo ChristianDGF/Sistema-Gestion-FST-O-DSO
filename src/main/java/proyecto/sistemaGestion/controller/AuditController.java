@@ -20,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "Auditoría", description = "API para consultar el historial de auditoría de Hibernate Envers")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasAuthority('SCOPE_report:view')")
+@PreAuthorize("hasAuthority('SCOPE_audit:view')")
 public class AuditController {
 
     private final AuditService auditService;

@@ -49,6 +49,7 @@ services:
       JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/sistema-gestion
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/sistema-gestion/protocol/openid-connect/certs
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:5173
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://alloy:4318/v1/traces
       LOKI_URL: http://loki:3100

@@ -1,0 +1,11 @@
+# OWASP ZAP baseline scan exceptions for the frontend SPA (http://localhost:5173).
+# Format: <plugin id>\t<IGNORE|INFO|WARN|FAIL>\t<rationale>
+# Only confirmed false positives / non-actionable findings are IGNOREd here.
+# Genuine, still-open gaps (CSP style-src 'unsafe-inline', missing COEP header) are
+# intentionally left as WARN so they keep showing up in the report - see docs/security-testing.md.
+
+10027	IGNORE	False positive: evidence is a substring of minified keycloak-js/opentelemetry code (e.g. "in response to some user interaction or stat..."), not a developer comment leaking information.
+10049	IGNORE	index.html is the public SPA shell with no sensitive data; being cacheable is expected and intentional for load performance.
+10094	IGNORE	False positive: evidence is the base64 alphabet constant (A-Za-z0-9) used internally by a bundled library's base64 codec, not an actual encoded secret.
+10109	IGNORE	"Modern Web Application" is an informational ZAP classification tag, not a vulnerability.
+90005	IGNORE	Sec-Fetch-Dest is a request header set by the browser; the server has no way to set it on a response, so this rule cannot be actioned here.

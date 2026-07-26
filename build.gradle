@@ -5,6 +5,7 @@ plugins {
 	id 'jacoco'
 	id "org.sonarqube" version "5.1.0.4882"
 	id 'org.springframework.cloud.contract' version '4.2.0'
+	id 'org.owasp.dependencycheck' version '12.2.2'
 }
 
 group = 'proyecto'
@@ -39,7 +40,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 	implementation 'com.bucket4j:bucket4j_jdk17-core:8.14.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
@@ -106,6 +107,22 @@ jacocoTestCoverageVerification {
 				minimum = 0.60
 			}
 		}
+	}
+}
+
+dependencyCheck {
+	failBuildOnCVSS = 8
+	formats = ['HTML', 'JSON']
+	outputDirectory = "${buildDir}/reports/dependency-check"
+	suppressionFile = "${projectDir}/dependency-check-suppressions.xml"
+	nvd {
+		apiKey = System.getenv('NVD_API_KEY') ?: ''
+	}
+	analyzers {
+		assemblyEnabled = false
+		nodeEnabled = false
+		nodeAuditEnabled = false
+		nuspecEnabled = false
 	}
 }
 
