@@ -3,6 +3,7 @@ import { check, sleep } from 'k6';
 import { BASE_URL } from '../config.js';
 import { login, authHeaders } from '../lib/auth.js';
 import { seedProducts, teardownProducts } from '../lib/seed.js';
+import { buildSummary } from '../lib/report.js';
 
 // Sanity check: 1 VU, 1 iteration through every target endpoint.
 // Run this before load.js/stress.js against any environment to fail fast
@@ -68,4 +69,8 @@ export default function (data) {
 
 export function teardown(data) {
   teardownProducts(data.accessToken, [data.productId]);
+}
+
+export function handleSummary(data) {
+  return buildSummary('smoke', data);
 }

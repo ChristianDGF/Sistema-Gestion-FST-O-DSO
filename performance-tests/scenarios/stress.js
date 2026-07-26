@@ -3,6 +3,7 @@ import { login } from '../lib/auth.js';
 import { seedProducts, teardownProducts } from '../lib/seed.js';
 import { pickAction, runAction } from '../lib/mix.js';
 import { currentAccessToken } from '../lib/session.js';
+import { buildSummary } from '../lib/report.js';
 
 // Escalating stages well beyond the expected 20 concurrent users (see load.js) to find
 // the point where the system degrades. http_req_failed is intentionally NOT capped at a
@@ -44,4 +45,8 @@ export default function (data) {
 export function teardown(data) {
   const { accessToken } = login();
   teardownProducts(accessToken, data.productIds);
+}
+
+export function handleSummary(data) {
+  return buildSummary('stress', data);
 }

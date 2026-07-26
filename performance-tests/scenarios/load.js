@@ -4,6 +4,7 @@ import { login } from '../lib/auth.js';
 import { seedProducts, teardownProducts } from '../lib/seed.js';
 import { pickAction, runAction } from '../lib/mix.js';
 import { currentAccessToken } from '../lib/session.js';
+import { buildSummary } from '../lib/report.js';
 
 // Expected normal concurrency for a small/medium business: 20 concurrent users
 // browsing/updating inventory for a sustained period.
@@ -37,4 +38,8 @@ export default function (data) {
 export function teardown(data) {
   const { accessToken } = login();
   teardownProducts(accessToken, data.productIds);
+}
+
+export function handleSummary(data) {
+  return buildSummary('load', data);
 }
