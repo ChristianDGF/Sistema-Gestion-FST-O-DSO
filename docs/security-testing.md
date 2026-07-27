@@ -56,7 +56,7 @@ scope exacto requerido (éxito) y sin autoridades (403).
 ### Defecto encontrado y corregido
 
 `AuditController` exigía `SCOPE_report:view` en vez de `SCOPE_audit:view`. El rol
-`audit:view` ya existía como rol de Keycloak en `keycloak/sistema-gestion-realm.json`
+`audit:view` ya existía como rol de Keycloak en `keycloak/sistema-gestion-realm.json.template`
 pero nunca se aplicaba en código, permitiendo que cualquier usuario con acceso al
 dashboard/reportes (`report:view`) leyera también el historial completo de auditoría.
 Corregido; ver commit `fix(security): require audit:view scope on the audit trail
@@ -146,3 +146,59 @@ versión.
   durante el build de la imagen.
 - **Jenkins** (`Jenkinsfile`): stage `Security Scan` equivalente, entre las pruebas E2E
   y el build de Docker.
+
+## 7. Gestión de secretos
+
+Anteriormente `docker-compose.yml` y `keycloak/sistema-gestion-realm.json` traían
+contraseñas y client secrets hardcodeados en texto plano (`POSTGRES_PASSWORD=postgres`,
+`KEYCLOAK_ADMIN_PASSWORD=admin`, `GF_SECURITY_ADMIN_PASSWORD=admin`, y los client
+secrets `external-dev-secret-change-me`/`admin-client-dev-secret-change-me`). Esto
+incumplía el punto "no hardcoded credentials" de la rúbrica, sin importar que fueran
+valores de desarrollo.
+
+### Flujo actual
+
+1. **`.env.example`** (committeado) documenta cada variable requerida con un valor de
+   ejemplo. Se copia a **`.env`** (gitignorado, nunca se commitea) y se ajustan los
+   valores reales para el entorno local.
+2. **`docker-compose.yml`** ya no trae ningún secreto por defecto: cada variable usa la
+   sintaxis `${VAR:?mensaje}`, así que `docker compose up` falla explícitamente si falta
+   una variable en `.env`, en vez de arrancar silenciosamente con una contraseña
+   conocida.
+3. **`keycloak/sistema-gestion-realm.json.template`** reemplaza al antiguo
+   `sistema-gestion-realm.json` — los client secrets y las contraseñas de los usuarios
+   seed están como placeholders (`__KEYCLOAK_ADMIN_CLIENT_SECRET__`, etc.). El servicio
+   `keycloak` en `docker-compose.yml` renderiza el archivo real con `sed` a partir de las
+   variables de entorno al arrancar el contenedor, y lo escribe en un volumen nombrado
+   (`keycloak_import`) — el archivo con secretos reales nunca toca el working tree ni se
+   commitea.
+4. Ese mismo mecanismo de plantilla lo usa `build.gradle` (task `renderTestKeycloakRealm`)
+   para generar el realm que consume
+   [`KeycloakSecurityIntegrationTest`](../src/test/java/proyecto/sistemaGestion/integration/KeycloakSecurityIntegrationTest.java)
+   vía Testcontainers, con client secrets de prueba fijos (esa instancia de Keycloak es
+   efímera y nunca queda expuesta fuera de la JVM de test).
+5. `src/main/resources/application.properties` ya no tiene un fallback inseguro para
+   `app.keycloak.admin-client-secret` — sin `APP_KEYCLOAK_ADMIN_CLIENT_SECRET` definido,
+   Spring Boot falla al arrancar (fail-fast) en vez de usar el secreto público conocido.
+6. **CI** (`.github/workflows/ci.yml`) genera su propio `.env` efímero antes de cada
+   `docker compose up`, con secretos aleatorios (`openssl rand -hex 16`) que no salen del
+   runner.
+
+### Nota sobre las contraseñas de usuarios seed (`admin123`/`employee123`)
+
+Estas se mantienen como valores fijos, no como secretos rotables por entorno: están
+hardcodeadas también en el lado del test (`KeycloakSecurityIntegrationTest.java`,
+`performance-tests/config.js`, y los 5 specs de Playwright en `frontend/tests/`), que
+comparan contra el valor literal. Son credenciales de datos de prueba de un realm
+efímero de desarrollo/CI, no secretos que protejan un recurso real — desacoplarlas
+también del código de test es un cambio de testing más amplio, fuera del alcance de
+este arreglo de seguridad (ver `audit_report.md` para el detalle de scope).
+
+### Secretos ya comprometidos
+
+Los valores que estaban hardcodeados en el historial de git (`external-dev-secret-change-me`,
+`admin-client-dev-secret-change-me`, y las contraseñas de Postgres/Keycloak/Grafana)
+deben considerarse comprometidos si este repositorio llega a usarse en un entorno
+compartido — deben rotarse ahí. Purgar esos valores del historial de git (p. ej. con
+BFG o `git filter-repo`) es una operación destructiva que reescribe el historial y no se
+hizo como parte de este cambio; requiere una decisión y ejecución explícitas aparte.
