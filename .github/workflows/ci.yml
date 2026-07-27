@@ -174,8 +174,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:staging
+            ghcr.io/christiandgf/sistema-gestion-backend:${{ github.sha }}
+            ghcr.io/christiandgf/sistema-gestion-backend:staging
 
       - name: Build & push frontend image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
@@ -186,8 +186,8 @@ jobs:
             VITE_KEYCLOAK_URL=http://${{ secrets.STAGING_SSH_HOST }}:8080
             VITE_API_BASE_URL=http://${{ secrets.STAGING_SSH_HOST }}:8081/api/v1
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:staging
+            ghcr.io/christiandgf/sistema-gestion-frontend:${{ github.sha }}
+            ghcr.io/christiandgf/sistema-gestion-frontend:staging
 
   docker-build-push-production:
     name: Build & Push Docker Images (Production)
@@ -213,9 +213,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:production
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:latest
+            ghcr.io/christiandgf/sistema-gestion-backend:${{ github.sha }}
+            ghcr.io/christiandgf/sistema-gestion-backend:production
+            ghcr.io/christiandgf/sistema-gestion-backend:latest
 
       - name: Build & push frontend image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
@@ -226,9 +226,9 @@ jobs:
             VITE_KEYCLOAK_URL=http://${{ secrets.PROD_SSH_HOST }}:8080
             VITE_API_BASE_URL=http://${{ secrets.PROD_SSH_HOST }}:8081/api/v1
           tags: |
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:production
-            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:latest
+            ghcr.io/christiandgf/sistema-gestion-frontend:${{ github.sha }}
+            ghcr.io/christiandgf/sistema-gestion-frontend:production
+            ghcr.io/christiandgf/sistema-gestion-frontend:latest
 
   deploy-staging:
     name: Deploy to Staging
