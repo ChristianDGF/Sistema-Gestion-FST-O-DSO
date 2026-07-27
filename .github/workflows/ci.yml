@@ -144,7 +144,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew generateContractTests test jacocoTestReport sonar --no-daemon
-        continue-on-error: true
 
   performance-tests:
     name: Performance Testing (k6)
