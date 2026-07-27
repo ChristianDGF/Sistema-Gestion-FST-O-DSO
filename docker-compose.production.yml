@@ -1,0 +1,7 @@
+services:
+  app:
+    image: ghcr.io/christiandgf/sistema-gestion-backend:production
+    build: !reset null
+  frontend:
+    image: ghcr.io/christiandgf/sistema-gestion-frontend:production
+    build: !reset null

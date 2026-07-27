@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master", "development" ]
+    branches: [ "main", "master", "development", "staging" ]
   pull_request:
-    branches: [ "main", "master", "development" ]
+    branches: [ "main", "master", "development", "staging" ]
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * *' # nightly load test, doesn't block PRs
@@ -144,6 +144,144 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew generateContractTests test jacocoTestReport sonar --no-daemon
+
+  docker-build-push-staging:
+    name: Build & Push Docker Images (Staging)
+    runs-on: ubuntu-latest
+    needs: [build-and-test, sonarcloud]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:staging
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            VITE_KEYCLOAK_URL=http://${{ secrets.STAGING_SSH_HOST }}:8080
+            VITE_API_BASE_URL=http://${{ secrets.STAGING_SSH_HOST }}:8081/api/v1
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:staging
+
+  docker-build-push-production:
+    name: Build & Push Docker Images (Production)
+    runs-on: ubuntu-latest
+    needs: [build-and-test, sonarcloud]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:production
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-backend:latest
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            VITE_KEYCLOAK_URL=http://${{ secrets.PROD_SSH_HOST }}:8080
+            VITE_API_BASE_URL=http://${{ secrets.PROD_SSH_HOST }}:8081/api/v1
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:production
+            ghcr.io/${{ github.repository_owner }}/sistema-gestion-frontend:latest
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: docker-build-push-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    environment:
+      name: staging
+      url: http://${{ secrets.STAGING_SSH_HOST }}:5173
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/sistema-gestion
+            git fetch origin staging
+            git checkout staging
+            git reset --hard origin/staging
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml pull app frontend
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans
+            docker image prune -f
+
+      - name: Smoke check staging
+        run: |
+          sleep 20
+          curl -sf http://${{ secrets.STAGING_SSH_HOST }}:8081/actuator/health | grep '"status":"UP"'
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker-build-push-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: http://${{ secrets.PROD_SSH_HOST }}:5173
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/sistema-gestion
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            docker compose -f docker-compose.yml -f docker-compose.production.yml pull app frontend
+            docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --remove-orphans
+            docker image prune -f
+
+      - name: Smoke check production
+        run: |
+          sleep 20
+          curl -sf http://${{ secrets.PROD_SSH_HOST }}:8081/actuator/health | grep '"status":"UP"'
 
   performance-tests:
     name: Performance Testing (k6)
