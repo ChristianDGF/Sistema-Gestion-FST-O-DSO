@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "e1a6b4a0-8f2b-4b8b-9b1e-external-api-001",
     "name": "Sistema Gestion - External B2B API",
-    "description": "Manual test flow for the external/M2M API (/api/external/v1/**). Run '01 - Auth' first to populate access_token and internal_access_token collection variables, then run the other folders.",
+    "description": "Manual test flow for the external/M2M API (/api/external/v1/**). Run '01 - Auth' first to populate access_token and internal_access_token collection variables, then run the other folders. Before running, fill in external_client_secret with the KEYCLOAK_EXTERNAL_CLIENT_SECRET value from your local .env.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -10,7 +10,7 @@
     { "key": "api_url", "value": "http://localhost:8081", "type": "string" },
     { "key": "realm", "value": "sistema-gestion", "type": "string" },
     { "key": "external_client_id", "value": "sistema-gestion-external-client", "type": "string" },
-    { "key": "external_client_secret", "value": "external-dev-secret-change-me", "type": "string" },
+    { "key": "external_client_secret", "value": "REPLACE_WITH_YOUR_LOCAL_KEYCLOAK_EXTERNAL_CLIENT_SECRET", "type": "string" },
     { "key": "internal_client_id", "value": "sistema-gestion-client", "type": "string" },
     { "key": "internal_username", "value": "employee", "type": "string" },
     { "key": "internal_password", "value": "employee123", "type": "string" },
