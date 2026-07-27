@@ -1,0 +1,130 @@
+{
+  "realm": "sistema-gestion",
+  "enabled": true,
+  "displayName": "Sistema de Gestión de Inventarios",
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      { "name": "admin", "composite": true, "composites": { "realm": ["product:view", "product:manage", "stock:view", "stock:manage", "report:view", "user:manage", "audit:view"] } },
+      { "name": "employee", "composite": true, "composites": { "realm": ["product:view", "stock:view"] } },
+      { "name": "product:view" },
+      { "name": "product:manage" },
+      { "name": "stock:view" },
+      { "name": "stock:manage" },
+      { "name": "report:view" },
+      { "name": "user:manage" },
+      { "name": "audit:view" },
+      { "name": "external:product:read" },
+      { "name": "external:stock:read" },
+      { "name": "external-partner", "composite": true, "composites": { "realm": ["external:product:read", "external:stock:read"] } }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "sistema-gestion-client",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "attributes": {
+        "access.token.lifespan": "3600",
+        "refresh.token.lifespan": "86400"
+      },
+      "protocolMappers": [
+        {
+          "name": "permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "permissions",
+            "jsonType.label": "String",
+            "multivalued": true,
+            "access.token.claim": true,
+            "id.token.claim": true
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "sistema-gestion-external-client",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "__KEYCLOAK_EXTERNAL_CLIENT_SECRET__",
+      "attributes": {
+        "access.token.lifespan": "3600"
+      },
+      "protocolMappers": [
+        {
+          "name": "permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "permissions",
+            "jsonType.label": "String",
+            "multivalued": true,
+            "access.token.claim": true,
+            "id.token.claim": true
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "sistema-gestion-admin-client",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "__KEYCLOAK_ADMIN_CLIENT_SECRET__",
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@sistema.com",
+      "firstName": "Admin",
+      "lastName": "Sistema",
+      "credentials": [{ "type": "password", "value": "__SEED_ADMIN_PASSWORD__", "temporary": false }],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "employee",
+      "enabled": true,
+      "email": "employee@sistema.com",
+      "firstName": "Employee",
+      "lastName": "Sistema",
+      "credentials": [{ "type": "password", "value": "__SEED_EMPLOYEE_PASSWORD__", "temporary": false }],
+      "realmRoles": ["employee"]
+    },
+    {
+      "username": "service-account-sistema-gestion-external-client",
+      "enabled": true,
+      "serviceAccountClientId": "sistema-gestion-external-client",
+      "realmRoles": ["external-partner"]
+    },
+    {
+      "username": "service-account-sistema-gestion-admin-client",
+      "enabled": true,
+      "serviceAccountClientId": "sistema-gestion-admin-client",
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "view-realm"]
+      }
+    }
+  ]
+}

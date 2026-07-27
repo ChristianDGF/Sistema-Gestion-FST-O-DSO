@@ -19,14 +19,40 @@ java {
 	}
 }
 
+// Renders keycloak/sistema-gestion-realm.json.template (the same template docker-compose.yml uses)
+// into a test-only realm.json on the test classpath, so KeycloakSecurityIntegrationTest imports the
+// same realm shape without a plaintext-secret copy committed to the repo. Client secrets default to
+// fixed test-only values since the Testcontainers Keycloak they configure is torn down after each run
+// and never reachable outside the test JVM; seed user passwords intentionally stay admin123/employee123
+// to match the literal values KeycloakSecurityIntegrationTest asserts against.
+def testKeycloakRealmDir = layout.buildDirectory.dir('generated-test-resources/keycloak')
+
+tasks.register('renderTestKeycloakRealm') {
+	def templateFile = file('keycloak/sistema-gestion-realm.json.template')
+	def outputDir = testKeycloakRealmDir
+	inputs.file(templateFile)
+	outputs.dir(outputDir)
+	doLast {
+		def outFile = outputDir.get().file('sistema-gestion-realm.json').asFile
+		outFile.parentFile.mkdirs()
+		outFile.text = templateFile.text
+				.replace('__KEYCLOAK_EXTERNAL_CLIENT_SECRET__', System.getenv('KEYCLOAK_EXTERNAL_CLIENT_SECRET') ?: 'test-external-client-secret')
+				.replace('__KEYCLOAK_ADMIN_CLIENT_SECRET__', System.getenv('KEYCLOAK_ADMIN_CLIENT_SECRET') ?: 'test-admin-client-secret')
+				.replace('__SEED_ADMIN_PASSWORD__', 'admin123')
+				.replace('__SEED_EMPLOYEE_PASSWORD__', 'employee123')
+	}
+}
+
 sourceSets {
-	// Exposes keycloak/sistema-gestion-realm.json on the test classpath (as "sistema-gestion-realm.json")
-	// so integration tests import the same realm used by docker-compose.yml, with no duplicate copy to drift.
 	test {
 		resources {
-			srcDir 'keycloak'
+			srcDir testKeycloakRealmDir
 		}
 	}
+}
+
+tasks.named('processTestResources') {
+	dependsOn renderTestKeycloakRealm
 }
 
 
