@@ -260,8 +260,16 @@ jobs:
         env:
           STAGING_HOST: ${{ secrets.STAGING_SSH_HOST }}
         run: |
-          sleep 20
-          curl -sf "http://$STAGING_HOST:8081/actuator/health" | grep '"status":"UP"'
+          for i in $(seq 1 12); do
+            if curl -sf "http://$STAGING_HOST:8081/actuator/health" | grep -q '"status":"UP"'; then
+              echo "Backend is up after ${i}0s"
+              exit 0
+            fi
+            echo "Waiting for backend to become healthy... (attempt $i/12)"
+            sleep 10
+          done
+          echo "Backend did not become healthy in time"
+          exit 1
 
   deploy-production:
     name: Deploy to Production
@@ -291,8 +299,16 @@ jobs:
         env:
           PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
         run: |
-          sleep 20
-          curl -sf "http://$PROD_HOST:8081/actuator/health" | grep '"status":"UP"'
+          for i in $(seq 1 12); do
+            if curl -sf "http://$PROD_HOST:8081/actuator/health" | grep -q '"status":"UP"'; then
+              echo "Backend is up after ${i}0s"
+              exit 0
+            fi
+            echo "Waiting for backend to become healthy... (attempt $i/12)"
+            sleep 10
+          done
+          echo "Backend did not become healthy in time"
+          exit 1
 
   performance-tests:
     name: Performance Testing (k6)
