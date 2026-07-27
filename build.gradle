@@ -173,6 +173,7 @@ sonar {
 		property "sonar.sourceEncoding", "UTF-8"
 		property "sonar.exclusions", "**/dto/**, **/entity/**, **/enums/**, **/SistemaGestionApplication.java"
 		property "sonar.cpd.exclusions", "**/dto/**, **/entity/**"
+		property "sonar.qualitygate.wait", "true"
 	}
 }
 
