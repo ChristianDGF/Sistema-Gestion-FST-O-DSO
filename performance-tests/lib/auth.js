@@ -5,7 +5,7 @@ import { KEYCLOAK_URL, REALM, CLIENT_ID, TEST_USER } from '../config.js';
 const TOKEN_URL = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`;
 
 // Resource Owner Password Grant against the public client (directAccessGrantsEnabled=true
-// for sistema-gestion-client, see keycloak/sistema-gestion-realm.json).
+// for sistema-gestion-client, see keycloak/sistema-gestion-realm.json.template).
 export function login(user = TEST_USER) {
   const res = http.post(
     TOKEN_URL,

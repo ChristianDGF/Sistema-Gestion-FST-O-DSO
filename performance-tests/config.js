@@ -13,7 +13,7 @@ export const CLIENT_ID = __ENV.KEYCLOAK_CLIENT_ID || 'sistema-gestion-client';
 // REPORTS_DIR when the working directory isn't the repo root (see Jenkinsfile).
 export const REPORTS_DIR = __ENV.REPORTS_DIR || 'performance-tests/reports';
 
-// Realm roles (keycloak/sistema-gestion-realm.json) are granular: "employee" only
+// Realm roles (keycloak/sistema-gestion-realm.json.template) are granular: "employee" only
 // carries product:view/stock:view. The traffic mix in lib/mix.js also exercises
 // product:manage/stock:manage (create product, register movement), so the default
 // test identity must be "admin", which holds every permission.

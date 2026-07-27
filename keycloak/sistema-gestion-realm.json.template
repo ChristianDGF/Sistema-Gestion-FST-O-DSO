@@ -58,7 +58,7 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "external-dev-secret-change-me",
+      "secret": "__KEYCLOAK_EXTERNAL_CLIENT_SECRET__",
       "attributes": {
         "access.token.lifespan": "3600"
       },
@@ -87,7 +87,7 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "admin-client-dev-secret-change-me",
+      "secret": "__KEYCLOAK_ADMIN_CLIENT_SECRET__",
       "attributes": {
         "access.token.lifespan": "300"
       }
@@ -100,7 +100,7 @@
       "email": "admin@sistema.com",
       "firstName": "Admin",
       "lastName": "Sistema",
-      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "credentials": [{ "type": "password", "value": "__SEED_ADMIN_PASSWORD__", "temporary": false }],
       "realmRoles": ["admin"]
     },
     {
@@ -109,7 +109,7 @@
       "email": "employee@sistema.com",
       "firstName": "Employee",
       "lastName": "Sistema",
-      "credentials": [{ "type": "password", "value": "employee123", "temporary": false }],
+      "credentials": [{ "type": "password", "value": "__SEED_EMPLOYEE_PASSWORD__", "temporary": false }],
       "realmRoles": ["employee"]
     },
     {

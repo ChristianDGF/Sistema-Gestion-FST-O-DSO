@@ -42,3 +42,6 @@ zap-reports/
 ### Performance test output ###
 performance-tests/reports/*
 !performance-tests/reports/.gitkeep
+
+### Secrets ###
+.env

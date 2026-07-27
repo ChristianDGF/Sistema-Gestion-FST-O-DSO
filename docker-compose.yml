@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: inventario_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD - copia .env.example a .env y completa los valores}
     ports:
       - "5432:5432"
     volumes:
@@ -23,15 +23,31 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://db:5432/inventario_db
       KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: postgres
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD - copia .env.example a .env y completa los valores}
       KC_HOSTNAME: localhost
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Falta KEYCLOAK_ADMIN_PASSWORD - copia .env.example a .env y completa los valores}
+      KEYCLOAK_EXTERNAL_CLIENT_SECRET: ${KEYCLOAK_EXTERNAL_CLIENT_SECRET:?Falta KEYCLOAK_EXTERNAL_CLIENT_SECRET - copia .env.example a .env y completa los valores}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:?Falta KEYCLOAK_ADMIN_CLIENT_SECRET - copia .env.example a .env y completa los valores}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Falta SEED_ADMIN_PASSWORD - copia .env.example a .env y completa los valores}
+      SEED_EMPLOYEE_PASSWORD: ${SEED_EMPLOYEE_PASSWORD:?Falta SEED_EMPLOYEE_PASSWORD - copia .env.example a .env y completa los valores}
     ports:
       - "8080:8080"
-    command: ["start-dev", "--import-realm"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        sed -e "s|__KEYCLOAK_EXTERNAL_CLIENT_SECRET__|$$KEYCLOAK_EXTERNAL_CLIENT_SECRET|g" \
+            -e "s|__KEYCLOAK_ADMIN_CLIENT_SECRET__|$$KEYCLOAK_ADMIN_CLIENT_SECRET|g" \
+            -e "s|__SEED_ADMIN_PASSWORD__|$$SEED_ADMIN_PASSWORD|g" \
+            -e "s|__SEED_EMPLOYEE_PASSWORD__|$$SEED_EMPLOYEE_PASSWORD|g" \
+            /opt/keycloak/data/import-template/sistema-gestion-realm.json.template \
+            > /opt/keycloak/data/import/sistema-gestion-realm.json
+        exec /opt/keycloak/bin/kc.sh start-dev --import-realm
     volumes:
-      - ./keycloak:/opt/keycloak/data/import
+      - ./keycloak:/opt/keycloak/data/import-template:ro
+      - type: tmpfs
+        target: /opt/keycloak/data/import
     depends_on:
       db:
         condition: service_healthy
@@ -45,12 +61,13 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inventario_db
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD - copia .env.example a .env y completa los valores}
       JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/sistema-gestion
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/sistema-gestion/protocol/openid-connect/certs
       APP_CORS_ALLOWED_ORIGINS: http://localhost:5173
       APP_KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      APP_KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:?Falta KEYCLOAK_ADMIN_CLIENT_SECRET - copia .env.example a .env y completa los valores}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://alloy:4318/v1/traces
       LOKI_URL: http://loki:3100
@@ -133,7 +150,7 @@ services:
     container_name: inventario-grafana
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?Falta GF_SECURITY_ADMIN_PASSWORD - copia .env.example a .env y completa los valores}
       GF_USERS_ALLOW_SIGN_UP: "false"
     ports:
       - "3000:3000"
