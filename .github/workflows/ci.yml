@@ -234,7 +234,9 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: docker-build-push-staging
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    # success() implícito mira toda la cadena transitiva (incluye sonarcloud, que va 'skipped'
+    # en pushes a staging) - hace falta !failure() && !cancelled() otra vez, mismo motivo que arriba.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging' && !failure() && !cancelled()
     environment:
       name: staging
       url: http://34.136.168.229:5173
@@ -265,7 +267,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: docker-build-push-production
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !failure() && !cancelled()
     environment:
       name: production
       url: http://34.57.191.185:5173
