@@ -3,6 +3,7 @@ WORKDIR /app
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle gradle
 COPY src src
+COPY keycloak keycloak
 RUN chmod +x gradlew && ./gradlew build -x test --no-daemon --parallel
 
 FROM eclipse-temurin:21-jre AS runtime
