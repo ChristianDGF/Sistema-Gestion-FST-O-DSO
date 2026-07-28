@@ -10,6 +10,12 @@ pipeline {
         // not real Docker-in-Docker). Testcontainers still stops/removes containers
         // normally on JVM exit - Ryuk is only a safety net for abrupt crashes.
         TESTCONTAINERS_RYUK_DISABLED = 'true'
+        // Same sibling-container issue for the actual test containers (e.g. Postgres):
+        // Testcontainers auto-detects 172.17.0.1 as the reachable host, which isn't
+        // routable from inside this container's own network namespace. Docker Desktop
+        // exposes host.docker.internal precisely for this - overriding it here makes
+        // Testcontainers report that as the host for every container it spawns.
+        TESTCONTAINERS_HOST_OVERRIDE = 'host.docker.internal'
     }
 
     stages {
