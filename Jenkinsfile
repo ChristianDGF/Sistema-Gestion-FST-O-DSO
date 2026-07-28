@@ -5,6 +5,11 @@ pipeline {
         GRADLE_OPTS = '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true'
         FRONTEND_DIR = "${WORKSPACE}/frontend"
         IMAGE_TAG = "jenkins-${env.BUILD_NUMBER}"
+        // Testcontainers' Ryuk reaper can't reconnect when the containers it spawns are
+        // siblings of this one (Jenkins talks to the host's Docker via a mounted socket,
+        // not real Docker-in-Docker). Testcontainers still stops/removes containers
+        // normally on JVM exit - Ryuk is only a safety net for abrupt crashes.
+        TESTCONTAINERS_RYUK_DISABLED = 'true'
     }
 
     stages {
