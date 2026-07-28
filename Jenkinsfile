@@ -40,7 +40,7 @@ pipeline {
             }
             post {
                 always {
-                    junit 'build/reports/tests/**/TEST-*.xml'
+                    junit 'build/test-results/**/TEST-*.xml'
                     publishHTML(
                         target: [
                             allowMissing: true,
