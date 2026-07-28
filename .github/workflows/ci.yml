@@ -8,21 +8,50 @@ on:
     # again on the resulting push is pure redundancy. staging/main keep it because those pushes
     # are what actually gate the Docker build + deploy jobs later in this same run.
     branches: [ "main", "master", "staging" ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
   pull_request:
     branches: [ "main", "master", "development", "staging" ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * *' # nightly load test, doesn't block PRs
 
 jobs:
+  # Deliberately not a paths-ignore on the triggers above: a required status check that never
+  # gets a workflow run reports as "Expected - Waiting for status to be reported" forever and
+  # blocks merging. This job always runs (fast) and every other job skips off its output instead -
+  # a skipped required check satisfies branch protection, a missing one doesn't.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.check.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            MERGE_BASE=$(git merge-base "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+            CHANGED=$(git diff --name-only "$MERGE_BASE" "${{ github.event.pull_request.head.sha }}")
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")
+          else
+            CHANGED=""
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          if [ -n "$CHANGED" ] && ! echo "$CHANGED" | grep -qvE '(\.md$|^docs/)'; then
+            echo "docs_only=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build-and-test:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs_only != 'true'
 
     steps:
     - name: Checkout Code
@@ -133,10 +162,10 @@ jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [changes, build-and-test]
     # El plan gratuito de SonarCloud solo soporta análisis de PRs y de la rama principal.
     # Saltar en pushes directos a staging/development evita el error "Not authorized".
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    if: needs.changes.outputs.docs_only != 'true' && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
     steps:
       - name: Checkout (full history for blame)
         uses: actions/checkout@v4
@@ -162,10 +191,10 @@ jobs:
   docker-build-push-staging:
     name: Build & Push Docker Images (Staging)
     runs-on: ubuntu-latest
-    needs: [build-and-test, sonarcloud]
+    needs: [changes, build-and-test, sonarcloud]
     # sonarcloud se salta en pushes a staging (plan free) - needs.*.result == 'skipped' no basta para
     # desactivar el skip-cascade por defecto de GitHub Actions; hace falta !failure() && !cancelled().
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging' && !failure() && !cancelled()
+    if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'push' && github.ref == 'refs/heads/staging' && !failure() && !cancelled()
     permissions:
       contents: read
       packages: write
@@ -244,10 +273,12 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: docker-build-push-staging
+    needs: [changes, docker-build-push-staging]
     # success() implícito mira toda la cadena transitiva (incluye sonarcloud, que va 'skipped'
     # en pushes a staging) - hace falta !failure() && !cancelled() otra vez, mismo motivo que arriba.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging' && !failure() && !cancelled()
+    # docs_only se chequea explícito porque !failure()/!cancelled() no detectan que
+    # docker-build-push-staging se saltó (result == 'skipped' no es failure ni cancelled).
+    if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'push' && github.ref == 'refs/heads/staging' && !failure() && !cancelled()
     environment:
       name: staging
       url: http://34.136.168.229:5173
@@ -283,8 +314,10 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: docker-build-push-production
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !failure() && !cancelled()
+    needs: [changes, docker-build-push-production]
+    # docs_only se chequea explícito porque !failure()/!cancelled() no detectan que
+    # docker-build-push-production se saltó (result == 'skipped' no es failure ni cancelled).
+    if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' && !failure() && !cancelled()
     environment:
       name: production
       url: http://34.57.191.185:5173
