@@ -2,9 +2,20 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master", "development", "staging" ]
+    # "development" is deliberately absent here: nothing on this workflow is gated on a push to
+    # development (docker-build-push-*/deploy-* only fire for staging/main), so once branch
+    # protection requires the pull_request run to pass before merging, re-running build-and-test
+    # again on the resulting push is pure redundancy. staging/main keep it because those pushes
+    # are what actually gate the Docker build + deploy jobs later in this same run.
+    branches: [ "main", "master", "staging" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches: [ "main", "master", "development", "staging" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * *' # nightly load test, doesn't block PRs
