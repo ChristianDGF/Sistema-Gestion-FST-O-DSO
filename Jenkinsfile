@@ -89,20 +89,24 @@ pipeline {
         }
 
         stage('Security Scan (SCA)') {
-            options {
-                // Without NVD_API_KEY, the NVD update is rate-limited to ~5 requests/30s
-                // and can hang for a very long time - bound it so a stuck update fails
-                // the stage instead of blocking the pipeline indefinitely.
-                timeout(time: 20, unit: 'MINUTES')
-            }
             steps {
                 // The NVD 2.0 API itself is flaky (widely-reported outages/throttling,
                 // independent of having a valid key) - don't let an external NVD failure
                 // block the whole pipeline. failBuildOnCVSS still gates on real findings
                 // whenever the scan does complete.
+                //
+                // The timeout sits INSIDE catchError on purpose: as a stage option it
+                // latched the whole build to ABORTED when the first-ever (cold-cache)
+                // NVD download exceeded 20min, even though the pipeline kept going.
+                // Inside catchError the timeout just marks the stage UNSTABLE.
+                // The NVD cache lives in GRADLE_USER_HOME (persistent volume), so only
+                // the first run on a fresh Jenkins home is slow; incremental updates
+                // take seconds. 30min covers the cold-cache download.
                 catchError(buildResult: null, stageResult: 'UNSTABLE') {
-                    withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
-                        sh './gradlew dependencyCheckAnalyze --no-daemon'
+                    timeout(time: 30, unit: 'MINUTES') {
+                        withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
+                            sh './gradlew dependencyCheckAnalyze --no-daemon'
+                        }
                     }
                 }
                 dir("${FRONTEND_DIR}") {
