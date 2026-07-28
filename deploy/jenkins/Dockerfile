@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 USER jenkins
 
+# ws-cleanup provides the cleanWs() step used in the pipeline's post actions.
 RUN jenkins-plugin-cli --plugins \
       git \
       workflow-aggregator \
@@ -27,4 +28,5 @@ RUN jenkins-plugin-cli --plugins \
       sonar \
       credentials-binding \
       pipeline-stage-view \
+      ws-cleanup \
       blueocean

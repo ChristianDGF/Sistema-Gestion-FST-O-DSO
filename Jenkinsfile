@@ -96,13 +96,16 @@ pipeline {
                 // whenever the scan does complete.
                 //
                 // The timeout sits INSIDE catchError on purpose: as a stage option it
-                // latched the whole build to ABORTED when the first-ever (cold-cache)
-                // NVD download exceeded 20min, even though the pipeline kept going.
-                // Inside catchError the timeout just marks the stage UNSTABLE.
-                // The NVD cache lives in GRADLE_USER_HOME (persistent volume), so only
-                // the first run on a fresh Jenkins home is slow; incremental updates
-                // take seconds. 30min covers the cold-cache download.
-                catchError(buildResult: null, stageResult: 'UNSTABLE') {
+                // aborted the whole build when the cold-cache NVD download exceeded
+                // 20min. Inside catchError the pipeline continues after a timeout
+                // (note: Jenkins still latches the overall result to ABORTED when the
+                // timeout fires - nothing can override that latch, it simply signals
+                // the scan did not complete).
+                // The NVD cache lives in GRADLE_USER_HOME (persistent volume), so the
+                // slow full download (~1-2h, throttled by NVD servers) only happens
+                // once per Jenkins home; incremental updates take seconds. Pre-populate
+                // the cache before the first build instead of relying on this timeout.
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     timeout(time: 30, unit: 'MINUTES') {
                         withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
                             sh './gradlew dependencyCheckAnalyze --no-daemon'
