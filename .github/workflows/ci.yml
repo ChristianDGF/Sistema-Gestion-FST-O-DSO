@@ -3,8 +3,14 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main", "master", "development", "staging" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches: [ "main", "master", "development", "staging" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * *' # nightly load test, doesn't block PRs
