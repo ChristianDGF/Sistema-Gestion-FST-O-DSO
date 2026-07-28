@@ -83,6 +83,9 @@ services:
     container_name: inventario-frontend
     ports:
       - "5173:80"
+    environment:
+      APP_ORIGIN: http://localhost:8081
+      KEYCLOAK_ORIGIN: http://localhost:8080
     depends_on:
       - app
     restart: unless-stopped
