@@ -66,7 +66,7 @@ jobs:
 
     - name: Frontend Install Dependencies
       working-directory: frontend
-      run: npm install
+      run: npm ci
 
     - name: Frontend npm audit (SCA)
       working-directory: frontend
@@ -91,12 +91,12 @@ jobs:
         docker compose up -d app frontend
         sleep 15
         cd frontend
-        npx playwright install --with-deps chromium
+        npx --no-install playwright install --with-deps chromium
         npm run test:e2e
       continue-on-error: true
 
     - name: OWASP ZAP Baseline Scan (frontend - staging)
-      uses: zaproxy/action-baseline@v0.15.0
+      uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
       continue-on-error: true
       with:
         target: 'http://localhost:5173'
@@ -106,7 +106,7 @@ jobs:
         artifact_name: 'zap-frontend-report'
 
     - name: OWASP ZAP Baseline Scan (backend Swagger UI - staging)
-      uses: zaproxy/action-baseline@v0.15.0
+      uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
       continue-on-error: true
       with:
         target: 'http://localhost:8081/swagger-ui.html'
@@ -257,11 +257,9 @@ jobs:
             docker image prune -f
 
       - name: Smoke check staging
-        env:
-          STAGING_HOST: ${{ secrets.STAGING_SSH_HOST }}
         run: |
           for i in $(seq 1 12); do
-            if curl -sf "http://$STAGING_HOST:8081/actuator/health" | grep -q '"status":"UP"'; then
+            if curl -sf "https://api.34-136-168-229.nip.io/actuator/health" | grep -q '"status":"UP"'; then
               echo "Backend is up after ${i}0s"
               exit 0
             fi
@@ -296,11 +294,9 @@ jobs:
             docker image prune -f
 
       - name: Smoke check production
-        env:
-          PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
         run: |
           for i in $(seq 1 12); do
-            if curl -sf "http://$PROD_HOST:8081/actuator/health" | grep -q '"status":"UP"'; then
+            if curl -sf "https://api.34-57-191-185.nip.io/actuator/health" | grep -q '"status":"UP"'; then
               echo "Backend is up after ${i}0s"
               exit 0
             fi
@@ -340,10 +336,10 @@ jobs:
           sleep 15
 
       - name: Set up k6
-        uses: grafana/setup-k6-action@v1
+        uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
 
       - name: Run k6 smoke scenario
-        uses: grafana/run-k6-action@v1
+        uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
         with:
           path: performance-tests/scenarios/smoke.js
         env:
@@ -351,7 +347,7 @@ jobs:
           KEYCLOAK_URL: http://localhost:8080
 
       - name: Run k6 load scenario
-        uses: grafana/run-k6-action@v1
+        uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
         with:
           path: performance-tests/scenarios/load.js
         env:
