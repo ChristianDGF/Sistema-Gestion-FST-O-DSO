@@ -183,8 +183,8 @@ jobs:
           context: ./frontend
           push: true
           build-args: |
-            VITE_KEYCLOAK_URL=http://${{ secrets.STAGING_SSH_HOST }}:8080
-            VITE_API_BASE_URL=http://${{ secrets.STAGING_SSH_HOST }}:8081/api/v1
+            VITE_KEYCLOAK_URL=https://auth.34-136-168-229.nip.io
+            VITE_API_BASE_URL=https://api.34-136-168-229.nip.io/api/v1
           tags: |
             ghcr.io/christiandgf/sistema-gestion-frontend:${{ github.sha }}
             ghcr.io/christiandgf/sistema-gestion-frontend:staging
@@ -223,8 +223,8 @@ jobs:
           context: ./frontend
           push: true
           build-args: |
-            VITE_KEYCLOAK_URL=http://${{ secrets.PROD_SSH_HOST }}:8080
-            VITE_API_BASE_URL=http://${{ secrets.PROD_SSH_HOST }}:8081/api/v1
+            VITE_KEYCLOAK_URL=https://auth.34-57-191-185.nip.io
+            VITE_API_BASE_URL=https://api.34-57-191-185.nip.io/api/v1
           tags: |
             ghcr.io/christiandgf/sistema-gestion-frontend:${{ github.sha }}
             ghcr.io/christiandgf/sistema-gestion-frontend:production

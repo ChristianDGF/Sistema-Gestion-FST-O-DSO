@@ -2,6 +2,16 @@ services:
   app:
     image: ghcr.io/christiandgf/sistema-gestion-backend:production
     build: !reset null
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://auth.34-57-191-185.nip.io/realms/sistema-gestion
+      APP_CORS_ALLOWED_ORIGINS: https://production.34-57-191-185.nip.io
+  keycloak:
+    environment:
+      KC_HOSTNAME: https://auth.34-57-191-185.nip.io
+      KC_PROXY_HEADERS: xforwarded
   frontend:
     image: ghcr.io/christiandgf/sistema-gestion-frontend:production
     build: !reset null
+    environment:
+      APP_ORIGIN: https://api.34-57-191-185.nip.io
+      KEYCLOAK_ORIGIN: https://auth.34-57-191-185.nip.io
