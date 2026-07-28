@@ -89,9 +89,16 @@ pipeline {
         }
 
         stage('Security Scan (SCA)') {
+            options {
+                // Without NVD_API_KEY, the NVD update is rate-limited to ~5 requests/30s
+                // and can hang for a very long time - bound it so a stuck update fails
+                // the stage instead of blocking the pipeline indefinitely.
+                timeout(time: 20, unit: 'MINUTES')
+            }
             steps {
-                // NVD_API_KEY avoids rate limiting against the NVD; not fatal if absent.
-                sh './gradlew dependencyCheckAnalyze --no-daemon'
+                withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
+                    sh './gradlew dependencyCheckAnalyze --no-daemon'
+                }
                 dir("${FRONTEND_DIR}") {
                     sh 'npm run audit'
                 }

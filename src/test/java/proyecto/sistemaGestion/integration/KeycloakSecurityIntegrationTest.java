@@ -21,6 +21,7 @@ import org.testcontainers.junit.jupiter.Container;
 
 import java.io.IOException;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +39,10 @@ class KeycloakSecurityIntegrationTest extends AbstractIntegrationTest {
 
     @Container
     static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.1.0")
-            .withRealmImportFile("/sistema-gestion-realm.json");
+            .withRealmImportFile("/sistema-gestion-realm.json")
+            // Default startup timeout is too tight under CI/Docker Desktop resource
+            // contention, causing intermittent "Timed out waiting for URL" failures.
+            .withStartupTimeout(Duration.ofMinutes(3));
 
     @BeforeAll
     static void startKeycloak() {
