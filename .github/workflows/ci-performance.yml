@@ -1,0 +1,64 @@
+name: Performance Tests (k6)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *' # nightly, no bloquea PRs
+
+jobs:
+  performance-tests:
+    name: Performance Testing (k6)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Write ephemeral .env for Docker Compose (CI-only, never committed)
+        run: |
+          cat > .env <<EOF
+          POSTGRES_PASSWORD=$(openssl rand -hex 16)
+          KEYCLOAK_ADMIN_PASSWORD=$(openssl rand -hex 16)
+          KEYCLOAK_EXTERNAL_CLIENT_SECRET=$(openssl rand -hex 16)
+          KEYCLOAK_ADMIN_CLIENT_SECRET=$(openssl rand -hex 16)
+          SEED_ADMIN_PASSWORD=admin123
+          SEED_EMPLOYEE_PASSWORD=employee123
+          GF_SECURITY_ADMIN_PASSWORD=$(openssl rand -hex 16)
+          EOF
+
+      - name: Start staging-like environment
+        run: |
+          docker compose up -d db keycloak
+          sleep 15
+          docker compose up -d app frontend
+          sleep 15
+
+      - name: Set up k6
+        uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
+
+      - name: Run k6 smoke scenario
+        uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
+        with:
+          path: performance-tests/scenarios/smoke.js
+        env:
+          BASE_URL: http://localhost:8081
+          KEYCLOAK_URL: http://localhost:8080
+
+      - name: Run k6 load scenario
+        uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
+        with:
+          path: performance-tests/scenarios/load.js
+        env:
+          BASE_URL: http://localhost:8081
+          KEYCLOAK_URL: http://localhost:8080
+
+      - name: Upload k6 reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-performance-reports
+          path: performance-tests/reports/
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: docker compose down
