@@ -92,8 +92,8 @@ jobs:
           context: ./frontend
           push: true
           build-args: |
-            VITE_KEYCLOAK_URL=https://auth.34-136-168-229.nip.io
-            VITE_API_BASE_URL=https://api.34-136-168-229.nip.io/api/v1
+            VITE_KEYCLOAK_URL=https://auth.${{ vars.STAGING_DOMAIN }}
+            VITE_API_BASE_URL=https://api.${{ vars.STAGING_DOMAIN }}/api/v1
           tags: |
             ghcr.io/christiandgf/sistema-gestion-frontend:${{ github.sha }}
             ghcr.io/christiandgf/sistema-gestion-frontend:staging
@@ -104,7 +104,7 @@ jobs:
     needs: docker-build-push
     environment:
       name: staging
-      url: http://34.136.168.229:5173
+      url: http://${{ vars.STAGING_IP }}:5173
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -134,7 +134,7 @@ jobs:
       - name: Smoke check staging
         run: |
           for i in $(seq 1 12); do
-            if curl -sf "https://api.34-136-168-229.nip.io/actuator/health" | grep -q '"status":"UP"'; then
+            if curl -sf "https://api.${{ vars.STAGING_DOMAIN }}/actuator/health" | grep -q '"status":"UP"'; then
               echo "Backend is up after ${i}0s"
               exit 0
             fi
