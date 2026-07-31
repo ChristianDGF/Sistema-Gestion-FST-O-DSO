@@ -77,6 +77,9 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: build-and-test
+    # El plan gratuito de SonarCloud soporta an??lisis en todos los PRs.
+    # La restricci??n original era evitar pushes directos a staging/development,
+    # pero ci-pr.yml solo se dispara en pull_request, as?? que no aplica.
     steps:
       - name: Checkout (full history for blame)
         uses: actions/checkout@v4
