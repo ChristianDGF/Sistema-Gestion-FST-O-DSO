@@ -124,6 +124,7 @@ jobs:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
             cd /opt/sistema-gestion
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
